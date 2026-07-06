@@ -1,13 +1,14 @@
 using Godot;
 using System.Collections.Generic;
+using System.Linq;
 
 public partial class MapView : Node2D
 {
     [Export] public int MapWidth = 16384;
     [Export] public int MapHeight = 16384;
 
-    private Node2D _terrainGroup;
-    private Node2D _territoryGroup;
+    private Sprite2D _terrain;
+    private Sprite2D _territory;
     private MapCamera _camera;
     private Node2D _markerLayer;
     private int _seed;
@@ -33,13 +34,15 @@ public partial class MapView : Node2D
 
         _seed = (int)(GD.Randi() % 100000);
 
-        _terrainGroup = new Node2D();
-        _terrainGroup.Name = "TerrainGroup";
-        AddChild(_terrainGroup);
+        _terrain = new Sprite2D();
+        _terrain.Name = "Terrain";
+        AddChild(_terrain);
 
-        _territoryGroup = new Node2D();
-        _territoryGroup.Name = "TerritoryGroup";
-        AddChild(_territoryGroup);
+        _territory = new Sprite2D();
+        _territory.Name = "Territory";
+        _territory.Modulate = new Color(1, 1, 1, 1f);
+        _territory.TextureFilter = TextureFilterEnum.Linear;
+        AddChild(_territory);
 
         _markerLayer = new Node2D();
         _markerLayer.Name = "Markers";
@@ -79,21 +82,6 @@ public partial class MapView : Node2D
         Generate();
     }
 
-    private void MakeTiled(Sprite2D proto, Node2D parent, ImageTexture tex, float scaleX, float scaleY)
-    {
-        foreach (var c in parent.GetChildren()) c.QueueFree();
-        for (int ty = 0; ty < 2; ty++)
-            for (int tx = 0; tx < 2; tx++)
-            {
-                var s = new Sprite2D();
-                s.Texture = tex;
-                s.Centered = false;
-                s.Scale = new Vector2(scaleX, scaleY);
-                s.Position = new Vector2(tx * MapWidth, ty * MapHeight);
-                parent.AddChild(s);
-            }
-    }
-
     private void Generate()
     {
         foreach (var c in _markerLayer.GetChildren())
@@ -102,8 +90,10 @@ public partial class MapView : Node2D
         _seed = (int)(GD.Randi() % 100000);
         GD.Print($"Generating map {MapWidth}x{MapHeight}");
 
-        ImageTexture terrainTex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
-        MakeTiled(null, _terrainGroup, terrainTex, MapWidth, MapHeight);
+        ImageTexture tex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
+        _terrain.Texture = tex;
+        _terrain.Centered = false;
+        _terrain.Scale = new Vector2(MapWidth, MapHeight);
 
         _locations = MapLocations.Generate(MapWidth, MapHeight, _seed);
         PlaceMarkers();
@@ -112,6 +102,58 @@ public partial class MapView : Node2D
         _camera.WorldW = MapWidth;
         _camera.WorldH = MapHeight;
         _camera.Position = new Vector2(MapWidth / 2f, MapHeight / 2f);
+
+        // init game systems
+        InitGame();
+    }
+
+    private void InitGame()
+    {
+        var gm = GetNodeOrNull<GameManager>("GameManager");
+        if (gm == null)
+        {
+            gm = new GameManager();
+            gm.Name = "GameManager";
+            AddChild(gm);
+        }
+
+        gm.InitFromMapData(_locations);
+
+        // create sects from map locations
+        foreach (var loc in _locations)
+        {
+            if (loc.Type == LocationType.Sect)
+            {
+                var sd = new SectData
+                {
+                    Id = gm.State.Sects.Count,
+                    Name = loc.Name,
+                    IsPlayer = gm.State.Sects.Count == 0,
+                    Lingshi = 200,
+                    Prestige = 50,
+                    SpiritVein = 100,
+                };
+                gm.State.Sects.Add(sd);
+            }
+        }
+
+        // assign city/village ownership
+        for (int i = 0; i < _locations.Count; i++)
+        {
+            var loc = _locations[i];
+            if (loc.Type == LocationType.City || loc.Type == LocationType.Village)
+            {
+                if (loc.OwnerIndex >= 0 && loc.OwnerIndex < gm.State.Sects.Count)
+                {
+                    var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name && l.Type == loc.Type);
+                    if (ld != null) ld.OwnerSectId = gm.State.Sects[loc.OwnerIndex].Id;
+                }
+            }
+        }
+
+        gm.InitSects(0);
+        gm.StartGameLoop();
+        GD.Print("[MapView] game systems initialized");
     }
 
     private void PlaceMarkers()
@@ -150,9 +192,11 @@ public partial class MapView : Node2D
     {
         if (_locations == null) return;
         var result = TerritoryMap.Generate(_locations, MapWidth, MapHeight);
-        if (result == null) return;
+        if (result == null) { _territory.Texture = null; return; }
+        _territory.Texture = result.Texture;
+        _territory.Centered = false;
         int cellSize = 8;
-        MakeTiled(null, _territoryGroup, result.Texture, cellSize, cellSize);
+        _territory.Scale = new Vector2(cellSize, cellSize);
         _centroids = result.Centroids;
         _cellSeeds = result.CellSeeds;
         _cellW = result.CellW;
@@ -162,12 +206,17 @@ public partial class MapView : Node2D
     private int SeedAtWorldPos(Vector2 worldPos)
     {
         if (_cellSeeds == null) return -1;
-        // wrap position
-        float wx = worldPos.X % MapWidth; if (wx < 0) wx += MapWidth;
-        float wy = worldPos.Y % MapHeight; if (wy < 0) wy += MapHeight;
+        // wrap into [0, MapW)
+        float wx = worldPos.X;
+        while (wx < 0) wx += MapWidth;
+        while (wx >= MapWidth) wx -= MapWidth;
+        float wy = worldPos.Y;
+        while (wy < 0) wy += MapHeight;
+        while (wy >= MapHeight) wy -= MapHeight;
         int cx = (int)(wx / 8f);
         int cy = (int)(wy / 8f);
-        if (cx < 0 || cx >= _cellW || cy < 0 || cy >= _cellH) return -1;
+        cx = Mathf.Clamp(cx, 0, _cellW - 1);
+        cy = Mathf.Clamp(cy, 0, _cellH - 1);
         return _cellSeeds[cy * _cellW + cx];
     }
 

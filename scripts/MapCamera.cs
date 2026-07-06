@@ -5,7 +5,6 @@ public partial class MapCamera : Camera2D
     [Export] public float ZoomSpeed = 0.1f;
     [Export] public float MinZoom = 0.1f;
     [Export] public float MaxZoom = 3.0f;
-    [Export] public float EdgePanSpeed = 600f;
     [Export] public float KeyPanSpeed = 800f;
 
     public float WorldW = 16384;
@@ -43,7 +42,6 @@ public partial class MapCamera : Camera2D
         {
             Vector2 delta = (GetViewport().GetMousePosition() - _midDragStart) / Zoom;
             Position = _midCamStart - delta;
-            WrapPosition();
         }
 
         if (@event is InputEventMouseButton mb3 && mb3.ButtonIndex == MouseButton.Right)
@@ -55,7 +53,6 @@ public partial class MapCamera : Camera2D
         {
             Vector2 delta = (GetViewport().GetMousePosition() - _rDragStart) / Zoom;
             Position = _rCamStart - delta;
-            WrapPosition();
         }
     }
 
@@ -79,30 +76,25 @@ public partial class MapCamera : Camera2D
         {
             float speed = Input.IsKeyPressed(Key.Shift) ? KeyPanSpeed * 2.5f : KeyPanSpeed;
             Position += dir.Normalized() * speed * (float)delta / Zoom.Length();
-            WrapPosition();
         }
-    }
 
-    private void WrapPosition()
-    {
+        // wrap
         var p = Position;
-        if (p.X < 0) p.X += WorldW;
-        if (p.X >= WorldW) p.X -= WorldW;
-        if (p.Y < 0) p.Y += WorldH;
-        if (p.Y >= WorldH) p.Y -= WorldH;
-        Position = p;
+        bool wrapped = false;
+        if (p.X < 0) { p.X += WorldW; wrapped = true; }
+        if (p.X >= WorldW) { p.X -= WorldW; wrapped = true; }
+        if (p.Y < 0) { p.Y += WorldH; wrapped = true; }
+        if (p.Y >= WorldH) { p.Y -= WorldH; wrapped = true; }
+        if (wrapped) Position = p;
     }
-
-    public int WrapShiftX;
-    public int WrapShiftY;
 
     public Vector2 GetWrappedMousePos()
     {
-        Vector2 mp = GetGlobalMousePosition();
-        if (mp.X < 0) mp.X += WorldW;
-        if (mp.X >= WorldW) mp.X -= WorldW;
-        if (mp.Y < 0) mp.Y += WorldH;
-        if (mp.Y >= WorldH) mp.Y -= WorldH;
+        var mp = GetGlobalMousePosition();
+        while (mp.X < 0) mp.X += WorldW;
+        while (mp.X >= WorldW) mp.X -= WorldW;
+        while (mp.Y < 0) mp.Y += WorldH;
+        while (mp.Y >= WorldH) mp.Y -= WorldH;
         return mp;
     }
 }

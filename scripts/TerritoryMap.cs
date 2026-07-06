@@ -71,6 +71,14 @@ public static class TerritoryMap
             grid[gi].Add(i);
         }
 
+        float WrapDelta(float a, float b, float worldSize)
+        {
+            float d = a - b;
+            if (d > worldSize / 2f) d -= worldSize;
+            else if (d < -worldSize / 2f) d += worldSize;
+            return d;
+        }
+
         int FindSeed(float wx, float wy)
         {
             int gx = (int)(wx / gridSize); if (gx < 0) gx = 0; if (gx >= gw) gx = gw - 1;
@@ -86,8 +94,8 @@ public static class TerritoryMap
                     if (bucket == null) continue;
                     foreach (int idx in bucket)
                     {
-                        float dx = allLocations[idx].Position.X - wx;
-                        float dy = allLocations[idx].Position.Y - wy;
+                        float dx = WrapDelta(allLocations[idx].Position.X, wx, mapW);
+                        float dy = WrapDelta(allLocations[idx].Position.Y, wy, mapH);
                         float d = dx * dx + dy * dy;
                         if (d < bestD) { bestD = d; best = idx; }
                     }
