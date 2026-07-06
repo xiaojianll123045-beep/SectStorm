@@ -83,7 +83,8 @@ public static class ModManager
         while (true)
         {
             var f = da.GetNext();
-            if (string.IsNullOrEmpty(f) || !f.EndsWith(".json")) continue;
+            if (string.IsNullOrEmpty(f)) break;
+            if (!f.EndsWith(".json")) continue;
             GD.Print($"[ModManager] language: {dir}/{f}");
         }
         da.ListDirEnd();
@@ -99,7 +100,8 @@ public static class ModManager
         while (true)
         {
             var f = da.GetNext();
-            if (string.IsNullOrEmpty(f) || !f.EndsWith(".json")) continue;
+            if (string.IsNullOrEmpty(f)) break;
+            if (!f.EndsWith(".json")) continue;
             GD.Print($"[ModManager] data: {dir}/{f}");
         }
         da.ListDirEnd();
@@ -115,7 +117,8 @@ public static class ModManager
         while (true)
         {
             var f = da.GetNext();
-            if (string.IsNullOrEmpty(f) || !f.EndsWith(".gd")) continue;
+            if (string.IsNullOrEmpty(f)) break;
+            if (!f.EndsWith(".gd")) continue;
             GD.Print($"[ModManager] script: {dir}/{f}");
         }
         da.ListDirEnd();
