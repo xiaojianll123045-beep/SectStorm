@@ -5,9 +5,11 @@ public partial class MapCamera : Camera2D
     [Export] public float ZoomSpeed = 0.1f;
     [Export] public float MinZoom = 0.1f;
     [Export] public float MaxZoom = 3.0f;
-    [Export] public float EdgePanMargin = 20f;
     [Export] public float EdgePanSpeed = 600f;
     [Export] public float KeyPanSpeed = 800f;
+
+    public float WorldW = 16384;
+    public float WorldH = 16384;
 
     private bool _middleDrag;
     private bool _rightDrag;
@@ -32,7 +34,6 @@ public partial class MapCamera : Camera2D
             }
         }
 
-        // middle drag
         if (@event is InputEventMouseButton mb2 && mb2.ButtonIndex == MouseButton.Middle)
         {
             if (mb2.Pressed) { _middleDrag = true; _midDragStart = GetViewport().GetMousePosition(); _midCamStart = Position; }
@@ -42,9 +43,9 @@ public partial class MapCamera : Camera2D
         {
             Vector2 delta = (GetViewport().GetMousePosition() - _midDragStart) / Zoom;
             Position = _midCamStart - delta;
+            WrapPosition();
         }
 
-        // right drag
         if (@event is InputEventMouseButton mb3 && mb3.ButtonIndex == MouseButton.Right)
         {
             if (mb3.Pressed) { _rightDrag = true; _rDragStart = GetViewport().GetMousePosition(); _rCamStart = Position; }
@@ -54,6 +55,7 @@ public partial class MapCamera : Camera2D
         {
             Vector2 delta = (GetViewport().GetMousePosition() - _rDragStart) / Zoom;
             Position = _rCamStart - delta;
+            WrapPosition();
         }
     }
 
@@ -63,13 +65,11 @@ public partial class MapCamera : Camera2D
         Vector2 mouse = GetViewport().GetMousePosition();
         Vector2 screen = GetViewport().GetVisibleRect().Size;
 
-        // edge pan
-        if (mouse.X < EdgePanMargin) dir.X -= 1f;
-        if (mouse.X > screen.X - EdgePanMargin) dir.X += 1f;
-        if (mouse.Y < EdgePanMargin) dir.Y -= 1f;
-        if (mouse.Y > screen.Y - EdgePanMargin) dir.Y += 1f;
+        if (mouse.X < 20f) dir.X -= 1f;
+        if (mouse.X > screen.X - 20f) dir.X += 1f;
+        if (mouse.Y < 20f) dir.Y -= 1f;
+        if (mouse.Y > screen.Y - 20f) dir.Y += 1f;
 
-        // WASD
         if (Input.IsKeyPressed(Key.W) || Input.IsKeyPressed(Key.Up)) dir.Y -= 1f;
         if (Input.IsKeyPressed(Key.S) || Input.IsKeyPressed(Key.Down)) dir.Y += 1f;
         if (Input.IsKeyPressed(Key.A) || Input.IsKeyPressed(Key.Left)) dir.X -= 1f;
@@ -77,8 +77,32 @@ public partial class MapCamera : Camera2D
 
         if (dir != Vector2.Zero)
         {
-            float speed = (Input.IsKeyPressed(Key.Shift)) ? KeyPanSpeed * 2.5f : KeyPanSpeed;
+            float speed = Input.IsKeyPressed(Key.Shift) ? KeyPanSpeed * 2.5f : KeyPanSpeed;
             Position += dir.Normalized() * speed * (float)delta / Zoom.Length();
+            WrapPosition();
         }
+    }
+
+    private void WrapPosition()
+    {
+        var p = Position;
+        if (p.X < 0) p.X += WorldW;
+        if (p.X >= WorldW) p.X -= WorldW;
+        if (p.Y < 0) p.Y += WorldH;
+        if (p.Y >= WorldH) p.Y -= WorldH;
+        Position = p;
+    }
+
+    public int WrapShiftX;
+    public int WrapShiftY;
+
+    public Vector2 GetWrappedMousePos()
+    {
+        Vector2 mp = GetGlobalMousePosition();
+        if (mp.X < 0) mp.X += WorldW;
+        if (mp.X >= WorldW) mp.X -= WorldW;
+        if (mp.Y < 0) mp.Y += WorldH;
+        if (mp.Y >= WorldH) mp.Y -= WorldH;
+        return mp;
     }
 }

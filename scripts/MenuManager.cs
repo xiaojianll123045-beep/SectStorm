@@ -118,7 +118,7 @@ public partial class MenuManager : Control
         loading.SetProgress(0);
         int step = 0;
         var timer = new Timer();
-        timer.WaitTime = 0.05;
+        timer.WaitTime = 0.01;
         timer.Timeout += () =>
         {
             step++;
@@ -127,8 +127,11 @@ public partial class MenuManager : Control
                 case 1: loading.SetStatus("正在初始化模组系统..."); ModManager.Init(); loading.SetProgress(1); break;
                 case 2: loading.SetStatus("正在加载模组..."); ModManager.ApplyAll(); loading.SetProgress(2); break;
                 case 3: loading.SetStatus("正在初始化 API..."); ModAPI.Init(); loading.SetProgress(3); break;
-                case 4: loading.SetStatus("正在生成地图..."); loading.SetProgress(4); break;
-                case 5:
+                case 4: loading.SetStatus("正在生成地形..."); loading.SetProgress(3); break;
+                case 5: loading.SetStatus("正在放置城市、村庄、宗门..."); loading.SetProgress(3); break;
+                case 6: loading.SetStatus("正在绘制图标..."); loading.SetProgress(4); break;
+                case 7: loading.SetStatus("正在计算势力范围与国界..."); loading.SetProgress(4); break;
+                case 8:
                     timer.Stop();
                     timer.QueueFree();
                     loading.Complete();

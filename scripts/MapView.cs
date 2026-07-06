@@ -6,8 +6,8 @@ public partial class MapView : Node2D
     [Export] public int MapWidth = 16384;
     [Export] public int MapHeight = 16384;
 
-    private Sprite2D _terrain;
-    private Sprite2D _territory;
+    private Node2D _terrainGroup;
+    private Node2D _territoryGroup;
     private MapCamera _camera;
     private Node2D _markerLayer;
     private int _seed;
@@ -25,39 +25,21 @@ public partial class MapView : Node2D
     private Texture2D _cityTex;
     private Texture2D _villageTex;
 
-    private ColorRect _loadOverlay;
-    private Label _loadStatus;
+
 
     public override void _Ready()
     {
         ModConsole.Init(this);
 
-        // loading overlay
-        _loadOverlay = new ColorRect();
-        _loadOverlay.Color = new Color(0.06f, 0.06f, 0.08f);
-        _loadOverlay.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-        _loadOverlay.ZIndex = 100;
-        AddChild(_loadOverlay);
-
-        _loadStatus = new Label();
-        _loadStatus.Text = "正在生成地图...";
-        _loadStatus.HorizontalAlignment = HorizontalAlignment.Center;
-        _loadStatus.SetAnchorsPreset(Control.LayoutPreset.Center);
-        _loadStatus.AddThemeFontSizeOverride("font_size", 16);
-        _loadStatus.AddThemeColorOverride("font_color", new Color(0.7f, 0.5f, 0.2f));
-        _loadOverlay.AddChild(_loadStatus);
-
         _seed = (int)(GD.Randi() % 100000);
 
-        _terrain = new Sprite2D();
-        _terrain.Name = "Terrain";
-        AddChild(_terrain);
+        _terrainGroup = new Node2D();
+        _terrainGroup.Name = "TerrainGroup";
+        AddChild(_terrainGroup);
 
-        _territory = new Sprite2D();
-        _territory.Name = "Territory";
-        _territory.Modulate = new Color(1, 1, 1, 1f);
-        _territory.TextureFilter = TextureFilterEnum.Linear;
-        AddChild(_territory);
+        _territoryGroup = new Node2D();
+        _territoryGroup.Name = "TerritoryGroup";
+        AddChild(_territoryGroup);
 
         _markerLayer = new Node2D();
         _markerLayer.Name = "Markers";
@@ -97,6 +79,21 @@ public partial class MapView : Node2D
         Generate();
     }
 
+    private void MakeTiled(Sprite2D proto, Node2D parent, ImageTexture tex, float scaleX, float scaleY)
+    {
+        foreach (var c in parent.GetChildren()) c.QueueFree();
+        for (int ty = 0; ty < 2; ty++)
+            for (int tx = 0; tx < 2; tx++)
+            {
+                var s = new Sprite2D();
+                s.Texture = tex;
+                s.Centered = false;
+                s.Scale = new Vector2(scaleX, scaleY);
+                s.Position = new Vector2(tx * MapWidth, ty * MapHeight);
+                parent.AddChild(s);
+            }
+    }
+
     private void Generate()
     {
         foreach (var c in _markerLayer.GetChildren())
@@ -105,31 +102,16 @@ public partial class MapView : Node2D
         _seed = (int)(GD.Randi() % 100000);
         GD.Print($"Generating map {MapWidth}x{MapHeight}");
 
-        SetLoadStatus("正在生成地形...");
-        ImageTexture tex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
-        _terrain.Texture = tex;
-        _terrain.Centered = false;
-        _terrain.Scale = new Vector2(MapWidth, MapHeight);
+        ImageTexture terrainTex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
+        MakeTiled(null, _terrainGroup, terrainTex, MapWidth, MapHeight);
 
-        SetLoadStatus("正在放置城市村庄宗门...");
         _locations = MapLocations.Generate(MapWidth, MapHeight, _seed);
-
-        SetLoadStatus("正在绘制图标...");
         PlaceMarkers();
-
-        SetLoadStatus("正在生成势力范围...");
         ApplyTerritory();
 
+        _camera.WorldW = MapWidth;
+        _camera.WorldH = MapHeight;
         _camera.Position = new Vector2(MapWidth / 2f, MapHeight / 2f);
-
-        // remove loading overlay deferred
-        Callable.From(() => { if (_loadOverlay != null) { _loadOverlay.QueueFree(); _loadOverlay = null; } }).CallDeferred();
-    }
-
-    private void SetLoadStatus(string text)
-    {
-        if (_loadStatus != null)
-            _loadStatus.Text = string.IsNullOrEmpty(text) ? "" : "正在生成地图...\n" + text;
     }
 
     private void PlaceMarkers()
@@ -168,11 +150,9 @@ public partial class MapView : Node2D
     {
         if (_locations == null) return;
         var result = TerritoryMap.Generate(_locations, MapWidth, MapHeight);
-        if (result == null) { _territory.Texture = null; return; }
-        _territory.Texture = result.Texture;
-        _territory.Centered = false;
+        if (result == null) return;
         int cellSize = 8;
-        _territory.Scale = new Vector2(cellSize, cellSize);
+        MakeTiled(null, _territoryGroup, result.Texture, cellSize, cellSize);
         _centroids = result.Centroids;
         _cellSeeds = result.CellSeeds;
         _cellW = result.CellW;
@@ -182,8 +162,11 @@ public partial class MapView : Node2D
     private int SeedAtWorldPos(Vector2 worldPos)
     {
         if (_cellSeeds == null) return -1;
-        int cx = (int)(worldPos.X / 8f);
-        int cy = (int)(worldPos.Y / 8f);
+        // wrap position
+        float wx = worldPos.X % MapWidth; if (wx < 0) wx += MapWidth;
+        float wy = worldPos.Y % MapHeight; if (wy < 0) wy += MapHeight;
+        int cx = (int)(wx / 8f);
+        int cy = (int)(wy / 8f);
         if (cx < 0 || cx >= _cellW || cy < 0 || cy >= _cellH) return -1;
         return _cellSeeds[cy * _cellW + cx];
     }
