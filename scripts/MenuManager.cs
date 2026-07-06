@@ -60,6 +60,8 @@ public partial class MenuManager : Control
         AddChild(btnBox);
 
         AddMenuBtn(btnBox, "开始游戏", () => OnStartGame());
+        AddMenuBtn(btnBox, "模组管理", () => OnMods());
+        AddMenuBtn(btnBox, "DLC", () => OnDLC());
         AddMenuBtn(btnBox, "设置", () => OnSettings());
         AddMenuBtn(btnBox, "关于", () => OnAbout());
         AddMenuBtn(btnBox, "退出", () => OnQuit());
@@ -109,7 +111,27 @@ public partial class MenuManager : Control
 
     private void OnStartGame()
     {
-        GetTree().ChangeSceneToFile("res://scenes/MapView.tscn");
+        var loading = ResourceLoader.Load<PackedScene>("res://scenes/LoadingScreen.tscn").Instantiate<LoadingScreen>();
+        GetTree().Root.AddChild(loading);
+        loading.SetStatus("正在初始化模组系统...");
+        ModManager.Init();
+        loading.SetProgress(1);
+        loading.SetStatus("正在加载模组...");
+        ModManager.ApplyAll();
+        loading.SetProgress(2);
+        loading.SetStatus("正在初始化 API...");
+        ModAPI.Init();
+        loading.SetProgress(3);
+        loading.SetStatus("正在准备控制台...");
+        // Defer map loading so loading screen renders first
+        loading.SetProgress(4);
+        loading.SetStatus("正在生成地图...");
+        Callable.From(() =>
+        {
+            GetTree().ChangeSceneToFile("res://scenes/MapView.tscn");
+            loading.Complete();
+            loading.QueueFree();
+        }).CallDeferred();
     }
 
     private void OnQuit()
@@ -306,6 +328,145 @@ public partial class MenuManager : Control
         closeBtn.CustomMinimumSize = new Vector2(80, 28);
         closeBtn.Pressed += () => _aboutPanel.Visible = false;
         panel.AddChild(closeBtn);
+    }
+
+    private Control _modsPanel;
+
+    private void OnMods()
+    {
+        if (_modsPanel == null) BuildModsPanel();
+        _modsPanel.Visible = !_modsPanel.Visible;
+    }
+
+    private void BuildModsPanel()
+    {
+        _modsPanel = MakePanel(460, 380);
+        var vbox = new VBoxContainer();
+        vbox.Size = new Vector2(420, 320);
+        vbox.Position = new Vector2(20, 20);
+        _modsPanel.GetChild(1).AddChild(vbox);
+
+        var title = new Label();
+        title.Text = "模组管理";
+        title.AddThemeFontSizeOverride("font_size", 20);
+        title.AddThemeColorOverride("font_color", Gold);
+        vbox.AddChild(title);
+        AddSeparator(vbox);
+
+        // init mod manager to scan mods
+        ModSandbox.Init();
+        var mods = ModSandbox.ScanModFolders();
+        if (mods.Count == 0)
+        {
+            var lbl = new Label();
+            lbl.Text = "未检测到模组\n\n将模组放入 mods/ 文件夹即可";
+            lbl.AddThemeColorOverride("font_color", TextColor);
+            lbl.AddThemeFontSizeOverride("font_size", 13);
+            vbox.AddChild(lbl);
+        }
+        else
+        {
+            foreach (var folder in mods)
+            {
+                var m = ModManifest.Load(folder);
+                var hbox = new HBoxContainer();
+                var cb = new CheckBox();
+                cb.Text = $"{m.Name} v{m.Version}";
+                cb.ButtonPressed = ModManager.IsEnabled(m.Id);
+                cb.Toggled += (on) => ModManager.SetEnabled(m.Id, on);
+                cb.AddThemeColorOverride("font_color", TextColor);
+                hbox.AddChild(cb);
+
+                if (!string.IsNullOrEmpty(m.Author))
+                {
+                    var author = new Label();
+                    author.Text = $"by {m.Author}";
+                    author.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.55f));
+                    author.AddThemeFontSizeOverride("font_size", 11);
+                    hbox.AddChild(author);
+                }
+                vbox.AddChild(hbox);
+            }
+        }
+
+        var closeBtn = new Button();
+        closeBtn.Text = "关闭";
+        closeBtn.AddThemeFontSizeOverride("font_size", 14);
+        closeBtn.AddThemeColorOverride("font_color", TextColor);
+        closeBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(0.20f, 0.20f, 0.25f)));
+        closeBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(0.25f, 0.25f, 0.30f)));
+        closeBtn.Position = new Vector2(360, 340);
+        closeBtn.CustomMinimumSize = new Vector2(80, 28);
+        closeBtn.Pressed += () => _modsPanel.Visible = false;
+        _modsPanel.GetChild(1).AddChild(closeBtn);
+    }
+
+    private Control _dlcPanel;
+
+    private void OnDLC()
+    {
+        if (_dlcPanel == null) BuildDLCPanel();
+        _dlcPanel.Visible = !_dlcPanel.Visible;
+    }
+
+    private void BuildDLCPanel()
+    {
+        _dlcPanel = MakePanel(420, 280);
+        var vbox = new VBoxContainer();
+        vbox.Size = new Vector2(380, 200);
+        vbox.Position = new Vector2(20, 20);
+        _dlcPanel.GetChild(1).AddChild(vbox);
+
+        var title = new Label();
+        title.Text = "DLC";
+        title.AddThemeFontSizeOverride("font_size", 20);
+        title.AddThemeColorOverride("font_color", Gold);
+        vbox.AddChild(title);
+        AddSeparator(vbox);
+
+        var lbl = new Label();
+        lbl.Text = "暂无 DLC\n\n敬请期待";
+        lbl.AddThemeColorOverride("font_color", TextColor);
+        lbl.AddThemeFontSizeOverride("font_size", 13);
+        vbox.AddChild(lbl);
+
+        var closeBtn = new Button();
+        closeBtn.Text = "关闭";
+        closeBtn.AddThemeFontSizeOverride("font_size", 14);
+        closeBtn.AddThemeColorOverride("font_color", TextColor);
+        closeBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(0.20f, 0.20f, 0.25f)));
+        closeBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(0.25f, 0.25f, 0.30f)));
+        closeBtn.Position = new Vector2(320, 240);
+        closeBtn.CustomMinimumSize = new Vector2(80, 28);
+        closeBtn.Pressed += () => _dlcPanel.Visible = false;
+        _dlcPanel.GetChild(1).AddChild(closeBtn);
+    }
+
+    private Control MakePanel(float w, float h)
+    {
+        var c = new Control();
+        c.Visible = false;
+        c.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        AddChild(c);
+
+        var overlay = new ColorRect();
+        overlay.Color = new Color(0, 0, 0, 0.5f);
+        overlay.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        c.AddChild(overlay);
+
+        var panel = new Panel();
+        panel.SetAnchorsPreset(Control.LayoutPreset.Center);
+        panel.Size = new Vector2(w, h);
+        panel.Position = new Vector2(-w / 2, -h / 2);
+        var pstyle = new StyleBoxFlat();
+        pstyle.BgColor = PanelBg;
+        pstyle.CornerRadiusTopLeft = 8;
+        pstyle.CornerRadiusTopRight = 8;
+        pstyle.CornerRadiusBottomLeft = 8;
+        pstyle.CornerRadiusBottomRight = 8;
+        panel.AddThemeStyleboxOverride("panel", pstyle);
+        c.AddChild(panel);
+        return c;
     }
 
     private void OnSettings()

@@ -53,7 +53,7 @@ public partial class ModConsole : Control
     private void BuildUI()
     {
         _panel = new Panel();
-        _panel.SetAnchorsPreset(LayoutPreset.FullRect);
+        _panel.SetAnchorsPreset(Control.LayoutPreset.TopWide);
         _panel.Size = new Vector2(800, 400);
         var style = new StyleBoxFlat();
         style.BgColor = new Color(0.08f, 0.08f, 0.10f, 0.92f);
@@ -61,7 +61,6 @@ public partial class ModConsole : Control
         AddChild(_panel);
 
         _output = new RichTextLabel();
-        _output.SetAnchorsPreset(LayoutPreset.TopWide);
         _output.Position = new Vector2(8, 8);
         _output.Size = new Vector2(784, 340);
         _output.AddThemeColorOverride("default_color", new Color(0.7f, 0.9f, 0.7f));
