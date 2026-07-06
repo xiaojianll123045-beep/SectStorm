@@ -250,8 +250,8 @@ public partial class MenuManager : Control
 
         var panel = new Panel();
         panel.SetAnchorsPreset(Control.LayoutPreset.Center);
-        panel.Size = new Vector2(420, 320);
-        panel.Position = new Vector2(-210, -160);
+        panel.Size = new Vector2(460, 420);
+        panel.Position = new Vector2(-230, -210);
         var pstyle = new StyleBoxFlat();
         pstyle.BgColor = PanelBg;
         pstyle.CornerRadiusTopLeft = 8;
@@ -262,7 +262,7 @@ public partial class MenuManager : Control
         _aboutPanel.AddChild(panel);
 
         var vbox = new VBoxContainer();
-        vbox.Size = new Vector2(380, 260);
+        vbox.Size = new Vector2(420, 360);
         vbox.Position = new Vector2(20, 20);
         panel.AddChild(vbox);
 
@@ -274,32 +274,26 @@ public partial class MenuManager : Control
 
         AddSeparator(vbox);
 
-        string[] lines = {
-            "开发：你的名字",
-            "引擎：Godot 4.7 Mono (C# .NET 8)",
-            "",
-            "开源地址：",
-            "[url=https://github.com/你的用户名/宗门风云]github.com/你的用户名/宗门风云[/url]",
-            "",
-            "本游戏由 DeepSeek 辅助开发",
-        };
-
-        foreach (var line in lines)
-        {
-            var lb = new Label();
-            if (line.StartsWith("[url"))
-            {
-                lb.Text = line;
-                lb.AutowrapMode = TextServer.AutowrapMode.Arbitrary;
-            }
-            else
-            {
-                lb.Text = line;
-            }
-            lb.AddThemeColorOverride("font_color", TextColor);
-            lb.AddThemeFontSizeOverride("font_size", 13);
-            vbox.AddChild(lb);
-        }
+        var rich = new RichTextLabel();
+        rich.Size = new Vector2(420, 340);
+        rich.FitContent = true;
+        rich.BbcodeEnabled = true;
+        rich.AddThemeFontSizeOverride("normal_font_size", 13);
+        rich.AddThemeColorOverride("default_color", TextColor);
+        rich.AddThemeColorOverride("meta_color", new Color(0.6f, 0.8f, 1.0f));
+        string text = "[center]开发：小坚来了[/center]\n"
+            + "[center]QQ号：1099155831[/center]\n"
+            + "[center]邮箱：xjllqw@163.com[/center]\n"
+            + "[center]QQ群：495063635[/center]\n\n"
+            + "[center]引擎：Godot 4.7 Mono (C# .NET 8)[/center]\n\n"
+            + "[center]🧠 本游戏由 [url=https://deepseek.com]DeepSeek[/url] 辅助开发[/center]\n\n"
+            + "[center][url=https://github.com/xiaojianll123045/SectStorm]🌐 开源地址[/url][/center]\n\n"
+            + "[center]本游戏没有任何防盗版反破解措施[/center]\n"
+            + "[center]源码开源，欢迎参考[/center]\n"
+            + "[center]玩得开心 ❤️[/center]";
+        rich.Text = text;
+        rich.MetaClicked += (meta) => { OS.ShellOpen(meta.AsString()); };
+        vbox.AddChild(rich);
 
         var closeBtn = new Button();
         closeBtn.Text = "关闭";
@@ -308,7 +302,7 @@ public partial class MenuManager : Control
         closeBtn.AddThemeColorOverride("font_hover_color", GoldBright);
         closeBtn.AddThemeStyleboxOverride("normal", MakeBtnStyle(new Color(0.20f, 0.20f, 0.25f)));
         closeBtn.AddThemeStyleboxOverride("hover", MakeBtnStyle(new Color(0.25f, 0.25f, 0.30f)));
-        closeBtn.Position = new Vector2(320, 280);
+        closeBtn.Position = new Vector2(360, 380);
         closeBtn.CustomMinimumSize = new Vector2(80, 28);
         closeBtn.Pressed += () => _aboutPanel.Visible = false;
         panel.AddChild(closeBtn);

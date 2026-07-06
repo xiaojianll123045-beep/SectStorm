@@ -27,6 +27,12 @@ public partial class MapView : Node2D
 
     public override void _Ready()
     {
+        // init mod system
+        ModManager.Init();
+        ModManager.ApplyAll();
+        ModAPI.Init();
+        ModConsole.Init(this);
+
         _seed = (int)(GD.Randi() % 100000);
 
         _terrain = new Sprite2D();

@@ -26,6 +26,10 @@ window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 window/per_pixel_transparency/enabled=false
 
+[input]
+
+toggle_console={ "deadzone": 0.5, "events": [ { "keycode": 4194332, "type": "InputEventKey" } ] }
+
 [dotnet]
 
 project/assembly_name="SectStorm"
