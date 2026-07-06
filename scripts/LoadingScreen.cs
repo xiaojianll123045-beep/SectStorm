@@ -19,9 +19,9 @@ public partial class LoadingScreen : Control
 
     public override void _Ready()
     {
-        _tipLabel = GetNode<Label>("VBox/TipLabel");
-        _statusLabel = GetNode<Label>("VBox/StatusLabel");
-        _progressBar = GetNode<ProgressBar>("VBox/ProgressBar");
+        _tipLabel = GetNode<Label>("Panel/TipLabel");
+        _statusLabel = GetNode<Label>("Panel/StatusLabel");
+        _progressBar = GetNode<ProgressBar>("Panel/ProgressBar");
         _timer = GetNode<Timer>("Timer");
 
         _tipLabel.Text = _tips[(int)(GD.Randi() % _tips.Length)];

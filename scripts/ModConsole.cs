@@ -53,7 +53,6 @@ public partial class ModConsole : Control
     private void BuildUI()
     {
         _panel = new Panel();
-        _panel.SetAnchorsPreset(Control.LayoutPreset.TopWide);
         _panel.Size = new Vector2(800, 400);
         var style = new StyleBoxFlat();
         style.BgColor = new Color(0.08f, 0.08f, 0.10f, 0.92f);
@@ -68,7 +67,6 @@ public partial class ModConsole : Control
         _panel.AddChild(_output);
 
         _input = new LineEdit();
-        _input.SetAnchorsPreset(LayoutPreset.BottomWide);
         _input.Position = new Vector2(8, 356);
         _input.Size = new Vector2(784, 32);
         _input.PlaceholderText = "输入命令... (Enter执行, ↑↓历史)";

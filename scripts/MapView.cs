@@ -25,13 +25,27 @@ public partial class MapView : Node2D
     private Texture2D _cityTex;
     private Texture2D _villageTex;
 
+    private ColorRect _loadOverlay;
+    private Label _loadStatus;
+
     public override void _Ready()
     {
-        // init mod system
-        ModManager.Init();
-        ModManager.ApplyAll();
-        ModAPI.Init();
         ModConsole.Init(this);
+
+        // loading overlay
+        _loadOverlay = new ColorRect();
+        _loadOverlay.Color = new Color(0.06f, 0.06f, 0.08f);
+        _loadOverlay.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _loadOverlay.ZIndex = 100;
+        AddChild(_loadOverlay);
+
+        _loadStatus = new Label();
+        _loadStatus.Text = "正在生成地图...";
+        _loadStatus.HorizontalAlignment = HorizontalAlignment.Center;
+        _loadStatus.SetAnchorsPreset(Control.LayoutPreset.Center);
+        _loadStatus.AddThemeFontSizeOverride("font_size", 16);
+        _loadStatus.AddThemeColorOverride("font_color", new Color(0.7f, 0.5f, 0.2f));
+        _loadOverlay.AddChild(_loadStatus);
 
         _seed = (int)(GD.Randi() % 100000);
 
@@ -90,16 +104,32 @@ public partial class MapView : Node2D
 
         _seed = (int)(GD.Randi() % 100000);
         GD.Print($"Generating map {MapWidth}x{MapHeight}");
+
+        SetLoadStatus("正在生成地形...");
         ImageTexture tex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
         _terrain.Texture = tex;
         _terrain.Centered = false;
         _terrain.Scale = new Vector2(MapWidth, MapHeight);
 
+        SetLoadStatus("正在放置城市村庄宗门...");
         _locations = MapLocations.Generate(MapWidth, MapHeight, _seed);
+
+        SetLoadStatus("正在绘制图标...");
         PlaceMarkers();
+
+        SetLoadStatus("正在生成势力范围...");
         ApplyTerritory();
 
         _camera.Position = new Vector2(MapWidth / 2f, MapHeight / 2f);
+
+        // remove loading overlay deferred
+        Callable.From(() => { if (_loadOverlay != null) { _loadOverlay.QueueFree(); _loadOverlay = null; } }).CallDeferred();
+    }
+
+    private void SetLoadStatus(string text)
+    {
+        if (_loadStatus != null)
+            _loadStatus.Text = string.IsNullOrEmpty(text) ? "" : "正在生成地图...\n" + text;
     }
 
     private void PlaceMarkers()

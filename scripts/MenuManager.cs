@@ -113,25 +113,32 @@ public partial class MenuManager : Control
     {
         var loading = ResourceLoader.Load<PackedScene>("res://scenes/LoadingScreen.tscn").Instantiate<LoadingScreen>();
         GetTree().Root.AddChild(loading);
-        loading.SetStatus("正在初始化模组系统...");
-        ModManager.Init();
-        loading.SetProgress(1);
-        loading.SetStatus("正在加载模组...");
-        ModManager.ApplyAll();
-        loading.SetProgress(2);
-        loading.SetStatus("正在初始化 API...");
-        ModAPI.Init();
-        loading.SetProgress(3);
-        loading.SetStatus("正在准备控制台...");
-        // Defer map loading so loading screen renders first
-        loading.SetProgress(4);
-        loading.SetStatus("正在生成地图...");
-        Callable.From(() =>
+        loading.SetStatus("正在初始化...");
+        // defer all work to next frame so loading screen renders first
+        loading.SetProgress(0);
+        int step = 0;
+        var timer = new Timer();
+        timer.WaitTime = 0.05;
+        timer.Timeout += () =>
         {
-            GetTree().ChangeSceneToFile("res://scenes/MapView.tscn");
-            loading.Complete();
-            loading.QueueFree();
-        }).CallDeferred();
+            step++;
+            switch (step)
+            {
+                case 1: loading.SetStatus("正在初始化模组系统..."); ModManager.Init(); loading.SetProgress(1); break;
+                case 2: loading.SetStatus("正在加载模组..."); ModManager.ApplyAll(); loading.SetProgress(2); break;
+                case 3: loading.SetStatus("正在初始化 API..."); ModAPI.Init(); loading.SetProgress(3); break;
+                case 4: loading.SetStatus("正在生成地图..."); loading.SetProgress(4); break;
+                case 5:
+                    timer.Stop();
+                    timer.QueueFree();
+                    loading.Complete();
+                    loading.QueueFree();
+                    GetTree().ChangeSceneToFile("res://scenes/MapView.tscn");
+                    break;
+            }
+        };
+        AddChild(timer);
+        timer.Start();
     }
 
     private void OnQuit()
