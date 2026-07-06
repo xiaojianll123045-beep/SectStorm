@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- 地面 -->
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 围墙 -->
+  <rect x="4" y="26" width="88" height="50" rx="1" fill="none" stroke="#909080" stroke-width="1.2"/>
+
+  <!-- 左厢 -->
+  <rect x="6" y="34" width="20" height="30" rx="0.5" fill="#c8b090"/>
+  <path d="M4,38 L12,26 L22,38 Q18,37 16,39 L8,39 Q6,37 4,38 Z" fill="#505038" stroke="#383828" stroke-width="0.5"/>
+  <rect x="12" y="50" width="4" height="14" rx="0.5" fill="#3a2010"/>
+
+  <!-- 右厢 -->
+  <rect x="70" y="34" width="20" height="30" rx="0.5" fill="#c8b090"/>
+  <path d="M74,38 L84,26 L92,38 Q88,37 86,39 L78,39 Q76,37 74,38 Z" fill="#505038" stroke="#383828" stroke-width="0.5"/>
+  <rect x="80" y="50" width="4" height="14" rx="0.5" fill="#3a2010"/>
+
+  <!-- 主殿台基 -->
+  <rect x="22" y="28" width="52" height="46" rx="1" fill="#c0b8a8" stroke="#a8a090" stroke-width="0.6"/>
+
+  <!-- 主殿下檐 -->
+  <path d="M14,34 L24,22 L72,22 L82,34 Q76,32 70,36 L26,36 Q20,32 14,34 Z" fill="#505038" stroke="#383828" stroke-width="0.6"/>
+  <path d="M14,34 Q12,30 16,28" fill="none" stroke="#505038" stroke-width="1" stroke-linecap="round"/>
+  <path d="M82,34 Q84,30 80,28" fill="none" stroke="#505038" stroke-width="1" stroke-linecap="round"/>
+
+  <!-- 主殿上檐 -->
+  <path d="M22,26 L30,16 L66,16 L74,26 Q68,24 64,28 L32,28 Q28,24 22,26 Z" fill="#404028" stroke="#282818" stroke-width="0.6"/>
+  <path d="M22,26 Q20,22 24,20" fill="none" stroke="#404028" stroke-width="1" stroke-linecap="round"/>
+  <path d="M74,26 Q76,22 72,20" fill="none" stroke="#404028" stroke-width="1" stroke-linecap="round"/>
+
+  <!-- 正脊 -->
+  <line x1="30" y1="16" x2="66" y2="16" stroke="#282818" stroke-width="1.5"/>
+  <path d="M30,16 Q27,14 25,16" fill="none" stroke="#404028" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M66,16 Q69,14 71,16" fill="none" stroke="#404028" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- 主殿墙 -->
+  <rect x="28" y="36" width="40" height="30" rx="0.5" fill="#c8b090" stroke="#a89070" stroke-width="0.6"/>
+
+  <!-- 柱 -->
+  <rect x="28" y="36" width="3" height="30" rx="0.3" fill="#b03535"/>
+  <rect x="65" y="36" width="3" height="30" rx="0.3" fill="#b03535"/>
+  <rect x="40" y="36" width="2" height="30" rx="0.3" fill="#b03535"/>
+  <rect x="54" y="36" width="2" height="30" rx="0.3" fill="#b03535"/>
+
+  <!-- 门 -->
+  <rect x="42" y="48" width="12" height="18" rx="1" fill="#3a2010"/>
+
+  <!-- 窗 -->
+  <rect x="30" y="42" width="7" height="8" rx="0.3" fill="#f0c060" opacity="0.6"/>
+  <rect x="59" y="42" width="7" height="8" rx="0.3" fill="#f0c060" opacity="0.6"/>
+
+  <!-- 阶 -->
+  <rect x="38" y="74" width="20" height="3" rx="0.3" fill="#d0c8b8"/>
+  <rect x="36" y="77" width="24" height="3" rx="0.3" fill="#c0b8a8"/>
+
+  <!-- 院门 -->
+  <rect x="42" y="76" width="12" height="2" fill="#3a2010"/>
+</svg>

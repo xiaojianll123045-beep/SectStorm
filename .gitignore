@@ -1,0 +1,20 @@
+# Godot
+.godot/
+import/
+*.translation
+*.uid
+
+# Build
+build/
+export/
+
+# IDE
+.vs/
+.vscode/
+*.user
+*.suo
+*.sln.docstates
+
+# OS
+.DS_Store
+Thumbs.db

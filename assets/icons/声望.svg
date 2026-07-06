@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 圆形紫红底 -->
+  <circle cx="16" cy="16" r="14" fill="#602040" stroke="#d4a436" stroke-width="1.5"/>
+
+  <!-- 金鼎主体 -->
+  <path d="M8,20 L10,12 L22,12 L24,20 Z" fill="#d4a030" stroke="#a08020" stroke-width="0.6"/>
+
+  <!-- 鼎腹 -->
+  <path d="M9,16 Q16,20 23,16" fill="none" stroke="#c09020" stroke-width="0.4"/>
+
+  <!-- 鼎耳(左) -->
+  <path d="M10,12 Q9,9 11,9 Q12,10 11,12" fill="none" stroke="#d4a030" stroke-width="0.8"/>
+
+  <!-- 鼎耳(右) -->
+  <path d="M22,12 Q23,9 21,9 Q20,10 21,12" fill="none" stroke="#d4a030" stroke-width="0.8"/>
+
+  <!-- 鼎足(左) -->
+  <rect x="10" y="20" width="2" height="4" rx="0.3" fill="#c09020"/>
+  <rect x="8" y="23" width="5" height="1.5" rx="0.3" fill="#b08018"/>
+
+  <!-- 鼎足(中) -->
+  <rect x="15" y="20" width="2" height="4" rx="0.3" fill="#c09020"/>
+  <rect x="13" y="23" width="5" height="1.5" rx="0.3" fill="#b08018"/>
+
+  <!-- 鼎足(右) -->
+  <rect x="20" y="20" width="2" height="4" rx="0.3" fill="#c09020"/>
+  <rect x="18" y="23" width="5" height="1.5" rx="0.3" fill="#b08018"/>
+
+  <!-- 鼎身纹饰 -->
+  <path d="M11,14 Q13,13 16,14 Q19,13 21,14" fill="none" stroke="#b08020" stroke-width="0.4"/>
+  <path d="M11,18 Q13,19 16,18 Q19,19 21,18" fill="none" stroke="#b08020" stroke-width="0.4"/>
+
+  <!-- 鼎口沿 -->
+  <rect x="9" y="11" width="14" height="1.5" rx="0.3" fill="#e0b840" stroke="#c09020" stroke-width="0.3"/>
+
+  <!-- 光芒四射 -->
+  <path d="M16,4 L16,2 M22,6 L23.5,4 M26,12 L28,11 M26,20 L28,21 M22,26 L23.5,28 M16,30 L16,32 M10,26 L8.5,28 M6,20 L4,21 M6,12 L4,11 M10,6 L8.5,4" stroke="#ffd700" stroke-width="0.6" opacity="0.5"/>
+</svg>

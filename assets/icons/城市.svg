@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4a060"/>
+      <stop offset="100%" stop-color="#b08040"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 城墙主体 -->
+  <rect x="2" y="22" width="44" height="18" rx="1" fill="url(#wall)" stroke="#8a6a30" stroke-width="1"/>
+
+  <!-- 城墙底部基石 -->
+  <rect x="2" y="38" width="44" height="2" rx="0.5" fill="#a08040" stroke="#8a6a30" stroke-width="0.5"/>
+
+  <!-- 城墙垛口 -->
+  <g fill="url(#wall)" stroke="#8a6a30" stroke-width="0.5">
+    <rect x="2" y="18" width="6" height="4" rx="0.5"/>
+    <rect x="10" y="18" width="6" height="4" rx="0.5"/>
+    <rect x="18" y="18" width="6" height="4" rx="0.5"/>
+    <rect x="26" y="18" width="6" height="4" rx="0.5"/>
+    <rect x="34" y="18" width="6" height="4" rx="0.5"/>
+    <rect x="42" y="18" width="4" height="4" rx="0.5"/>
+  </g>
+
+  <!-- 门洞 (拱形，通到底) -->
+  <path d="M15,40 L15,30 Q15,26 24,26 Q33,26 33,30 L33,40 Z" fill="#1a0e06"/>
+
+  <!-- 城门木板条 -->
+  <line x1="24" y1="26" x2="24" y2="40" stroke="#2a1808" stroke-width="0.6" opacity="0.4"/>
+
+  <!-- 城门楼 (下沿抵城墙顶 y=22) -->
+  <rect x="17" y="12" width="14" height="10" rx="0.5" fill="#a03030" stroke="#702020" stroke-width="0.8"/>
+
+  <!-- 城门楼窗户 -->
+  <rect x="19" y="14" width="3" height="3" rx="0.5" fill="#ffd060" opacity="0.9"/>
+  <rect x="26" y="14" width="3" height="3" rx="0.5" fill="#ffd060" opacity="0.9"/>
+
+  <!-- 城门楼屋顶 -->
+  <polygon points="14,12 24,6 34,12" fill="#408050" stroke="#206030" stroke-width="0.8"/>
+  <polygon points="16,12 24,7.5 32,12" fill="#50a060"/>
+
+  <!-- 城楼屋顶脊线 -->
+  <line x1="24" y1="6" x2="24" y2="12" stroke="#206030" stroke-width="0.6"/>
+
+  <!-- 城楼基底与城墙分隔线 -->
+  <line x1="17" y1="22" x2="31" y2="22" stroke="#8a6a30" stroke-width="0.8"/>
+
+  <!-- 阴影 -->
+  <ellipse cx="24" cy="44" rx="22" ry="2" fill="#000000" opacity="0.12"/>
+</svg>

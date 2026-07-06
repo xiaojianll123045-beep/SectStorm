@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxs7pkjqwyh6c"]
+
+[ext_resource type="Script" path="res://scripts/MapView.cs" id="1"]
+
+[node name="MapView" type="Node2D"]
+script = ExtResource("1")

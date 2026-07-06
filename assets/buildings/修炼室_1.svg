@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- 地面 -->
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 竹林 -->
+  <g stroke="#407040" stroke-width="1.5" opacity="0.5">
+    <line x1="4" y1="60" x2="8" y2="20"/>
+    <line x1="12" y1="64" x2="14" y2="28"/>
+    <line x1="84" y1="62" x2="80" y2="22"/>
+    <line x1="92" y1="60" x2="88" y2="18"/>
+  </g>
+
+  <!-- 台基 -->
+  <rect x="18" y="36" width="60" height="36" rx="1" fill="#c0b8a8" stroke="#a8a090" stroke-width="0.6"/>
+
+  <!-- 屋(半开放) -->
+  <rect x="22" y="40" width="52" height="28" rx="0.5" fill="#d0c0a8" stroke="#b0a088" stroke-width="0.5"/>
+
+  <!-- 室内地面(竹席) -->
+  <rect x="24" y="42" width="48" height="24" rx="0.5" fill="#c8b898" stroke="#b8a888" stroke-width="0.3"/>
+  <line x1="24" y1="48" x2="72" y2="48" stroke="#b8a888" stroke-width="0.2"/>
+  <line x1="24" y1="54" x2="72" y2="54" stroke="#b8a888" stroke-width="0.2"/>
+  <line x1="24" y1="60" x2="72" y2="60" stroke="#b8a888" stroke-width="0.2"/>
+
+  <!-- 柱 -->
+  <rect x="22" y="40" width="2.5" height="28" rx="0.3" fill="#a08060"/>
+  <rect x="71.5" y="40" width="2.5" height="28" rx="0.3" fill="#a08060"/>
+
+  <!-- 蒲团 -->
+  <ellipse cx="48" cy="54" rx="8" ry="4" fill="#b8a060" stroke="#a08850" stroke-width="0.4"/>
+  <ellipse cx="48" cy="53" rx="6" ry="2.5" fill="#c8b070"/>
+
+  <!-- 灵气法阵 -->
+  <circle cx="48" cy="54" r="12" fill="none" stroke="#4080c0" stroke-width="0.6" opacity="0.3"/>
+  <circle cx="48" cy="54" r="9" fill="none" stroke="#4080c0" stroke-width="0.4" opacity="0.2"/>
+  <path d="M40,54 L56,54 M48,46 L48,62" stroke="#4080c0" stroke-width="0.3" opacity="0.2"/>
+
+  <!-- 屋顶 -->
+  <path d="M10,36 L24,22 L72,22 L86,36 Q80,34 76,38 L20,38 Q16,34 10,36 Z" fill="#505038" stroke="#383828" stroke-width="0.8"/>
+  <path d="M18,28 L24,24 L72,24 L78,28 Q60,30 48,30 Q36,30 18,28 Z" fill="#605848"/>
+
+  <!-- 正脊 -->
+  <line x1="24" y1="22" x2="72" y2="22" stroke="#383828" stroke-width="1.5"/>
+
+  <!-- 飞檐 -->
+  <path d="M10,36 Q8,32 12,30" fill="none" stroke="#505038" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M86,36 Q88,32 84,30" fill="none" stroke="#505038" stroke-width="1.2" stroke-linecap="round"/>
+
+  <!-- 匾 "静" -->
+  <rect x="43" y="34" width="10" height="3" rx="0.3" fill="#3a2010"/>
+  <text x="48" y="36.5" text-anchor="middle" font-size="2.5" fill="#d4a030">静</text>
+</svg>

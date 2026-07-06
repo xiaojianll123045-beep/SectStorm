@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- 地面 -->
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 台基 -->
+  <rect x="14" y="34" width="68" height="38" rx="1" fill="#c0b8a8" stroke="#a8a090" stroke-width="0.6"/>
+
+  <!-- 屋身 -->
+  <rect x="22" y="40" width="52" height="28" rx="0.5" fill="#c8b090" stroke="#a89070" stroke-width="0.6"/>
+
+  <!-- 柱 -->
+  <rect x="22" y="40" width="3" height="28" rx="0.3" fill="#b03535"/>
+  <rect x="71" y="40" width="3" height="28" rx="0.3" fill="#b03535"/>
+  <rect x="36" y="40" width="2" height="28" rx="0.3" fill="#b03535"/>
+  <rect x="58" y="40" width="2" height="28" rx="0.3" fill="#b03535"/>
+
+  <!-- 门 -->
+  <rect x="42" y="48" width="12" height="20" rx="1" fill="#3a2010"/>
+
+  <!-- 窗 -->
+  <rect x="25" y="46" width="8" height="8" rx="0.3" fill="#f0c060" opacity="0.6"/>
+  <rect x="63" y="46" width="8" height="8" rx="0.3" fill="#f0c060" opacity="0.6"/>
+
+  <!-- 屋顶 -->
+  <path d="M4,36 L24,16 L72,16 L92,36 Q84,34 78,38 L18,38 Q12,34 4,36 Z" fill="#505038" stroke="#383828" stroke-width="0.8"/>
+
+  <!-- 屋顶亮面 -->
+  <path d="M16,26 L24,18 L72,18 L80,26 Q60,28 48,28 Q36,28 16,26 Z" fill="#605848"/>
+
+  <!-- 正脊 -->
+  <line x1="24" y1="16" x2="72" y2="16" stroke="#383828" stroke-width="2"/>
+  <line x1="24" y1="16" x2="72" y2="16" stroke="#706050" stroke-width="0.6" stroke-dasharray="1.5,1.5"/>
+
+  <!-- 鸱吻 -->
+  <path d="M24,16 Q20,14 18,16" fill="none" stroke="#505038" stroke-width="2" stroke-linecap="round"/>
+  <path d="M72,16 Q76,14 78,16" fill="none" stroke="#505038" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- 飞檐翘角 -->
+  <path d="M4,36 Q3,32 6,30" fill="none" stroke="#505038" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M92,36 Q93,32 90,30" fill="none" stroke="#505038" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- 瓦楞 -->
+  <line x1="28" y1="18" x2="28" y2="36" stroke="#484030" stroke-width="0.3"/>
+  <line x1="36" y1="18" x2="36" y2="35" stroke="#484030" stroke-width="0.3"/>
+  <line x1="44" y1="18" x2="44" y2="34" stroke="#484030" stroke-width="0.3"/>
+  <line x1="52" y1="18" x2="52" y2="34" stroke="#484030" stroke-width="0.3"/>
+  <line x1="60" y1="18" x2="60" y2="35" stroke="#484030" stroke-width="0.3"/>
+  <line x1="68" y1="18" x2="68" y2="36" stroke="#484030" stroke-width="0.3"/>
+
+  <!-- 阶 -->
+  <rect x="38" y="72" width="20" height="3" rx="0.3" fill="#d0c8b8"/>
+  <rect x="36" y="75" width="24" height="3" rx="0.3" fill="#c0b8a8"/>
+</svg>

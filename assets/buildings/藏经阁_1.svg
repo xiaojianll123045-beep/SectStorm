@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 台基 -->
+  <rect x="18" y="50" width="60" height="28" rx="1" fill="#c0b8a8" stroke="#a8a090" stroke-width="0.6"/>
+
+  <!-- 塔身1 -->
+  <rect x="28" y="36" width="40" height="18" rx="0.5" fill="#c8b090" stroke="#a89070" stroke-width="0.5"/>
+
+  <!-- 塔身2 -->
+  <rect x="34" y="22" width="28" height="16" rx="0.5" fill="#d0c0a8" stroke="#b0a088" stroke-width="0.5"/>
+
+  <!-- 刹 -->
+  <line x1="48" y1="6" x2="48" y2="18" stroke="#d4a030" stroke-width="2"/>
+  <circle cx="48" cy="5" r="2.5" fill="#ffd040" stroke="#d4a030" stroke-width="0.4"/>
+  <path d="M45,8 L48,12 L51,8" fill="none" stroke="#d4a030" stroke-width="0.6"/>
+
+  <!-- 檐1 -->
+  <path d="M16,38 L28,24 L68,24 L80,38 Q74,36 70,40 L26,40 Q22,36 16,38 Z" fill="#505038" stroke="#383828" stroke-width="0.6"/>
+  <path d="M16,38 Q14,34 18,32" fill="none" stroke="#505038" stroke-width="0.8" stroke-linecap="round"/>
+  <path d="M80,38 Q82,34 78,32" fill="none" stroke="#505038" stroke-width="0.8" stroke-linecap="round"/>
+
+  <!-- 檐2 -->
+  <path d="M24,24 L34,14 L62,14 L72,24 Q66,22 62,26 L34,26 Q30,22 24,24 Z" fill="#404028" stroke="#282818" stroke-width="0.6"/>
+  <path d="M24,24 Q22,20 26,18" fill="none" stroke="#404028" stroke-width="0.8" stroke-linecap="round"/>
+  <path d="M72,24 Q74,20 70,18" fill="none" stroke="#404028" stroke-width="0.8" stroke-linecap="round"/>
+
+  <!-- 窗 -->
+  <rect x="42" y="42" width="6" height="8" rx="0.3" fill="#f0c060" opacity="0.6"/>
+  <rect x="48" y="42" width="6" height="8" rx="0.3" fill="#f0c060" opacity="0.6"/>
+  <rect x="44" y="24" width="8" height="6" rx="0.3" fill="#f0c060" opacity="0.6"/>
+
+  <!-- 门 -->
+  <rect x="40" y="66" width="16" height="12" rx="1" fill="#3a2010"/>
+
+  <!-- 阶 -->
+  <rect x="38" y="78" width="20" height="3" rx="0.3" fill="#d0c8b8"/>
+</svg>

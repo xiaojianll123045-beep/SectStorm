@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 圆形青蓝底 -->
+  <circle cx="16" cy="16" r="14" fill="#304080" stroke="#d4a436" stroke-width="1.5"/>
+
+  <!-- 左山 -->
+  <polygon points="2,24 8,10 14,24" fill="#305030" stroke="#204020" stroke-width="0.5" stroke-linejoin="round"/>
+  <polygon points="4,24 8,12 12,24" fill="#406040"/>
+
+  <!-- 右山 -->
+  <polygon points="18,24 24,10 30,24" fill="#305030" stroke="#204020" stroke-width="0.5" stroke-linejoin="round"/>
+  <polygon points="20,24 24,12 28,24" fill="#406040"/>
+
+  <!-- 山顶雪 -->
+  <polygon points="6,14 8,10 10,14" fill="#d0d8d0" opacity="0.4"/>
+  <polygon points="22,14 24,10 26,14" fill="#d0d8d0" opacity="0.4"/>
+
+  <!-- 桥 -->
+  <path d="M10,22 Q16,18 22,22" fill="none" stroke="#d4a030" stroke-width="1.2"/>
+  <path d="M12,22 L12,24 M20,22 L20,24" stroke="#d4a030" stroke-width="0.5"/>
+  <path d="M11,21 Q16,17 21,21" fill="none" stroke="#e8c850" stroke-width="0.4"/>
+
+  <!-- 左松 -->
+  <polygon points="5,17 7,12 9,17" fill="#205028"/>
+  <rect x="7" y="17" width="0.8" height="3" fill="#604830"/>
+
+  <!-- 右松 -->
+  <polygon points="23,17 25,12 27,17" fill="#205028"/>
+  <rect x="25" y="17" width="0.8" height="3" fill="#604830"/>
+
+  <!-- 云海 -->
+  <ellipse cx="16" cy="25" rx="12" ry="2" fill="#ffffff" opacity="0.1"/>
+
+  <!-- 连接纹 -->
+  <path d="M8,20 Q16,16 24,20" fill="none" stroke="#d4a436" stroke-width="0.4" opacity="0.3" stroke-dasharray="1,1.5"/>
+</svg>

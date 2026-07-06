@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 左屋 -->
+  <rect x="8" y="24" width="14" height="16" rx="0.5" fill="#d4b888" stroke="#a08850" stroke-width="0.8"/>
+  <polygon points="6,24 15,16 24,24" fill="#706060" stroke="#504848" stroke-width="0.8" stroke-linejoin="round"/>
+
+  <!-- 左屋门 -->
+  <rect x="13" y="33" width="5" height="7" rx="0.5" fill="#3a2010"/>
+
+  <!-- 左屋窗(暖光，小) -->
+  <rect x="9" y="28" width="3" height="3" rx="0.3" fill="#ffc840" opacity="0.7"/>
+
+  <!-- 右屋 -->
+  <rect x="26" y="26" width="14" height="14" rx="0.5" fill="#d4b888" stroke="#a08850" stroke-width="0.8"/>
+  <polygon points="24,26 33,18 42,26" fill="#786868" stroke="#585050" stroke-width="0.8" stroke-linejoin="round"/>
+
+  <!-- 右屋门 -->
+  <rect x="30" y="34" width="5" height="6" rx="0.5" fill="#3a2010"/>
+
+  <!-- 右屋窗(暖光) -->
+  <rect x="35" y="29" width="3" height="3" rx="0.3" fill="#ffc840" opacity="0.7"/>
+
+  <!-- 左屋烟囱 -->
+  <rect x="11" y="17" width="2" height="3" rx="0.2" fill="#585050"/>
+  <path d="M11,17 Q12,16 13,17" fill="none" stroke="#585050" stroke-width="0.5"/>
+
+  <!-- 地面 -->
+  <rect x="4" y="40" width="40" height="2" rx="0.3" fill="#9a8a6a" opacity="0.3"/>
+
+  <!-- 阴影 -->
+  <ellipse cx="24" cy="44" rx="22" ry="2" fill="#000000" opacity="0.08"/>
+</svg>

@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="crystal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#80ffff"/>
+      <stop offset="30%" stop-color="#40c8e0"/>
+      <stop offset="60%" stop-color="#2080a0"/>
+      <stop offset="100%" stop-color="#0a3a5a"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#40ffff" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#20c0e0" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#20c0e0" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 光晕 -->
+  <circle cx="32" cy="36" r="30" fill="url(#glow)"/>
+
+  <!-- 主晶体六边形 (俯视菱形) -->
+  <polygon points="32,8 52,22 52,42 32,56 12,42 12,22" fill="url(#crystal)" stroke="#a0e8f0" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <!-- 晶体切割面: 左上 -->
+  <polygon points="32,8 32,32 12,42 12,22" fill="#60e0f0" opacity="0.3"/>
+
+  <!-- 晶体切割面: 右上 -->
+  <polygon points="32,8 52,22 52,42 32,32" fill="#ffffff" opacity="0.15"/>
+
+  <!-- 高光条 -->
+  <polygon points="32,12 44,22 44,30 32,26" fill="url(#shine)"/>
+
+  <!-- 中心高光反射点 -->
+  <ellipse cx="28" cy="22" rx="4" ry="6" fill="#ffffff" opacity="0.5" transform="rotate(-30 28 22)"/>
+  <ellipse cx="28" cy="22" rx="2" ry="4" fill="#ffffff" opacity="0.7" transform="rotate(-30 28 22)"/>
+
+  <!-- 底部尖端高光 -->
+  <polygon points="30,54 34,54 34,48 30,48" fill="#a0e8f0" opacity="0.3"/>
+
+  <!-- 灵气粒子 -->
+  <circle cx="16" cy="14" r="1" fill="#80ffff" opacity="0.6"/>
+  <circle cx="48" cy="12" r="1.2" fill="#80ffff" opacity="0.4"/>
+  <circle cx="50" cy="48" r="0.8" fill="#80ffff" opacity="0.5"/>
+  <circle cx="14" cy="46" r="1" fill="#80ffff" opacity="0.3"/>
+  <circle cx="32" cy="4" r="0.8" fill="#c0ffff" opacity="0.5"/>
+</svg>

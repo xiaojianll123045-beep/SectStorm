@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 台基 -->
+  <rect x="20" y="38" width="56" height="38" rx="1" fill="#c0b8a8" stroke="#a8a090" stroke-width="0.6"/>
+
+  <!-- 屋身 -->
+  <rect x="24" y="36" width="48" height="30" rx="0.5" fill="#c8b090" stroke="#a89070" stroke-width="0.5"/>
+
+  <!-- 柱 -->
+  <rect x="24" y="36" width="2.5" height="30" fill="#a08060"/>
+  <rect x="69.5" y="36" width="2.5" height="30" fill="#a08060"/>
+
+  <!-- 丹炉 -->
+  <circle cx="48" cy="52" r="8" fill="#806040" stroke="#604830" stroke-width="0.6"/>
+  <circle cx="48" cy="52" r="6" fill="#907050"/>
+  <circle cx="48" cy="52" r="4" fill="#a08060"/>
+  <!-- 炉口 -->
+  <ellipse cx="48" cy="46" rx="4" ry="1.5" fill="#604830"/>
+  <!-- 炉火 -->
+  <ellipse cx="48" cy="46" rx="2" ry="1" fill="#ff8020" opacity="0.6"/>
+
+  <!-- 炉足 -->
+  <rect x="42" y="58" width="2" height="4" fill="#604830"/>
+  <rect x="52" y="58" width="2" height="4" fill="#604830"/>
+
+  <!-- 烟囱 -->
+  <rect x="46" y="28" width="4" height="10" rx="0.5" fill="#705848"/>
+
+  <!-- 烟 -->
+  <path d="M48,26 Q44,22 48,18 Q52,14 48,10" fill="none" stroke="#c0c8d0" stroke-width="2" opacity="0.3" stroke-linecap="round"/>
+  <path d="M48,26 Q52,22 48,18 Q44,14 48,10" fill="none" stroke="#c0c8d0" stroke-width="1.5" opacity="0.2" stroke-linecap="round"/>
+
+  <!-- 屋顶 -->
+  <path d="M12,36 L24,24 L72,24 L84,36 Q78,34 74,38 L22,38 Q18,34 12,36 Z" fill="#505038" stroke="#383828" stroke-width="0.7"/>
+  <path d="M12,36 Q10,32 14,30" fill="none" stroke="#505038" stroke-width="1" stroke-linecap="round"/>
+  <path d="M84,36 Q86,32 82,30" fill="none" stroke="#505038" stroke-width="1" stroke-linecap="round"/>
+
+  <!-- 正脊 -->
+  <line x1="24" y1="24" x2="72" y2="24" stroke="#383828" stroke-width="1.2"/>
+
+  <!-- 门 -->
+  <rect x="42" y="54" width="12" height="14" rx="0.5" fill="#3a2010"/>
+
+  <!-- 阶 -->
+  <rect x="38" y="76" width="20" height="3" rx="0.3" fill="#d0c8b8"/>
+</svg>

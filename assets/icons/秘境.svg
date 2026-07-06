@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <radialGradient id="portal" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="15%" stop-color="#e0c0ff" stop-opacity="0.8"/>
+      <stop offset="40%" stop-color="#8040e0" stop-opacity="0.5"/>
+      <stop offset="70%" stop-color="#401080" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#200060" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#c0a0ff"/>
+      <stop offset="100%" stop-color="#8040e0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 外层光晕 -->
+  <circle cx="24" cy="24" r="22" fill="#6020c0" opacity="0.08"/>
+
+  <!-- 漩涡光环 -->
+  <ellipse cx="24" cy="24" rx="20" ry="18" fill="url(#portal)"/>
+
+  <!-- 漩涡纹理线 -->
+  <path d="M24,6 Q36,8 40,18 Q44,30 34,38 Q24,44 14,36 Q6,28 10,16 Q14,6 24,6" fill="none" stroke="#c0a0ff" stroke-width="0.6" opacity="0.3"/>
+  <path d="M24,8 Q34,12 36,20 Q38,30 30,36 Q22,40 16,34 Q10,26 14,18 Q18,8 24,8" fill="none" stroke="#e0c0ff" stroke-width="0.5" opacity="0.3"/>
+  <path d="M24,12 Q30,14 32,20 Q34,28 28,32 Q22,36 18,30 Q14,24 18,18 Q20,12 24,12" fill="none" stroke="#ffffff" stroke-width="0.4" opacity="0.2"/>
+
+  <!-- 核心 -->
+  <circle cx="24" cy="24" r="5" fill="url(#core)"/>
+  <circle cx="24" cy="24" r="3" fill="#ffffff" opacity="0.8"/>
+
+  <!-- 八卦装饰(四点) -->
+  <circle cx="24" cy="8" r="1" fill="#ffd700" opacity="0.6"/>
+  <circle cx="24" cy="40" r="1" fill="#ffd700" opacity="0.6"/>
+  <circle cx="8" cy="24" r="1" fill="#ffd700" opacity="0.6"/>
+  <circle cx="40" cy="24" r="1" fill="#ffd700" opacity="0.6"/>
+  <circle cx="13" cy="13" r="0.8" fill="#ffd700" opacity="0.4"/>
+  <circle cx="35" cy="35" r="0.8" fill="#ffd700" opacity="0.4"/>
+  <circle cx="13" cy="35" r="0.8" fill="#ffd700" opacity="0.4"/>
+  <circle cx="35" cy="13" r="0.8" fill="#ffd700" opacity="0.4"/>
+
+  <!-- 灵气飘散 -->
+  <circle cx="6" cy="10" r="0.6" fill="#c0a0ff" opacity="0.4"/>
+  <circle cx="42" cy="8" r="0.7" fill="#c0a0ff" opacity="0.3"/>
+  <circle cx="40" cy="42" r="0.6" fill="#c0a0ff" opacity="0.3"/>
+  <circle cx="8" cy="40" r="0.5" fill="#c0a0ff" opacity="0.2"/>
+</svg>

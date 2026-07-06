@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 台基 -->
+  <rect x="10" y="58" width="76" height="24" rx="1" fill="#c8c0b0" stroke="#b0a898" stroke-width="0.6"/>
+
+  <!-- 塔身1 -->
+  <rect x="20" y="48" width="56" height="14" rx="0.5" fill="#c8b090"/>
+  <!-- 塔身2 -->
+  <rect x="26" y="36" width="44" height="14" rx="0.5" fill="#d0c0a8"/>
+  <!-- 塔身3 -->
+  <rect x="32" y="24" width="32" height="14" rx="0.5" fill="#d8c8b0"/>
+  <!-- 塔身4 -->
+  <rect x="38" y="14" width="20" height="12" rx="0.5" fill="#e0d0b8"/>
+  <!-- 塔身5 -->
+  <rect x="42" y="6" width="12" height="10" rx="0.5" fill="#e8d8c0"/>
+
+  <!-- 刹 -->
+  <line x1="48" y1="2" x2="48" y2="6" stroke="#d4a030" stroke-width="2"/>
+  <circle cx="48" cy="1.5" r="2" fill="#ffd040" stroke="#d4a030" stroke-width="0.3"/>
+
+  <!-- 檐1 -->
+  <path d="M8,50 L20,36 L76,36 L88,50 Q82,48 78,52 L18,52 Q14,48 8,50 Z" fill="#505038" stroke="#383828" stroke-width="0.5"/>
+  <!-- 檐2 -->
+  <path d="M14,38 L26,26 L70,26 L82,38 Q76,36 72,40 L24,40 Q20,36 14,38 Z" fill="#404028" stroke="#282818" stroke-width="0.5"/>
+  <!-- 檐3 -->
+  <path d="M20,26 L32,16 L64,16 L76,26 Q70,24 66,28 L30,28 Q26,24 20,26 Z" fill="#302818" stroke="#181008" stroke-width="0.5"/>
+  <!-- 檐4 -->
+  <path d="M26,16 L38,8 L58,8 L70,16 Q64,14 60,18 L36,18 Q32,14 26,16 Z" fill="#282010" stroke="#100800" stroke-width="0.5"/>
+  <!-- 檐5 -->
+  <path d="M32,8 L42,2 L54,2 L64,8 Q58,6 54,10 L42,10 Q38,6 32,8 Z" fill="#201808" stroke="#100800" stroke-width="0.5"/>
+
+  <!-- 飞檐 -->
+  <path d="M8,50 Q6,46 10,44" fill="none" stroke="#505038" stroke-width="0.8" stroke-linecap="round"/>
+  <path d="M88,50 Q90,46 86,44" fill="none" stroke="#505038" stroke-width="0.8" stroke-linecap="round"/>
+
+  <!-- 窗 -->
+  <rect x="36" y="52" width="5" height="5" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="55" y="52" width="5" height="5" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="40" y="40" width="5" height="5" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="51" y="40" width="5" height="5" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="44" y="28" width="5" height="5" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="47" y="28" width="5" height="5" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="45" y="16" width="4" height="4" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="47" y="16" width="4" height="4" rx="0.3" fill="#f0c060" opacity="0.5"/>
+  <rect x="46" y="8" width="4" height="3" rx="0.3" fill="#f0c060" opacity="0.5"/>
+
+  <!-- 门 -->
+  <rect x="38" y="70" width="20" height="12" rx="1" fill="#3a2010"/>
+
+  <!-- 灯笼 -->
+  <ellipse cx="26" cy="52" rx="1.5" ry="2.5" fill="#cc3030"/>
+  <ellipse cx="70" cy="52" rx="1.5" ry="2.5" fill="#cc3030"/>
+
+  <!-- 石栏 -->
+  <rect x="10" y="78" width="76" height="2" fill="#a8a090"/>
+  <rect x="14" y="76" width="2" height="5" fill="#a8a090"/>
+  <rect x="26" y="76" width="2" height="5" fill="#a8a090"/>
+  <rect x="68" y="76" width="2" height="5" fill="#a8a090"/>
+  <rect x="80" y="76" width="2" height="5" fill="#a8a090"/>
+
+  <!-- 阶 -->
+  <rect x="36" y="82" width="24" height="2" rx="0.3" fill="#d0c8b8"/>
+</svg>

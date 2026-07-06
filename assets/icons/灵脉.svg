@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <radialGradient id="ground_glow" cx="50%" cy="55%" r="40%">
+      <stop offset="0%" stop-color="#40e0ff" stop-opacity="0.35"/>
+      <stop offset="40%" stop-color="#2080ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#1040c0" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur1">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+    <filter id="blur2">
+      <feGaussianBlur stdDeviation="1"/>
+    </filter>
+  </defs>
+
+  <!-- 地面光晕(大) -->
+  <ellipse cx="24" cy="30" rx="22" ry="16" fill="url(#ground_glow)"/>
+
+  <!-- 主脉发光底层 -->
+  <path d="M6,38 Q12,32 18,34 Q22,36 26,30 Q30,24 36,22 Q40,20 44,18" fill="none" stroke="#40c0ff" stroke-width="5" stroke-linecap="round" opacity="0.25" filter="url(#blur1)"/>
+
+  <!-- 主脉 -->
+  <path d="M6,38 Q12,32 18,34 Q22,36 26,30 Q30,24 36,22 Q40,20 44,18" fill="none" stroke="#20a0ff" stroke-width="2.5" stroke-linecap="round" opacity="0.9"/>
+  <path d="M6,38 Q12,32 18,34 Q22,36 26,30 Q30,24 36,22 Q40,20 44,18" fill="none" stroke="#a0e8ff" stroke-width="0.8" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- 支脉1 (左上) -->
+  <path d="M16,34 Q12,28 10,22 Q8,18 8,14" fill="none" stroke="#2080ff" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  <path d="M16,34 Q12,28 10,22 Q8,18 8,14" fill="none" stroke="#a0e8ff" stroke-width="0.6" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- 支脉2 (右下) -->
+  <path d="M26,30 Q28,36 30,40 Q32,44 34,46" fill="none" stroke="#2080ff" stroke-width="1.8" stroke-linecap="round" opacity="0.7"/>
+  <path d="M26,30 Q28,36 30,40 Q32,44 34,46" fill="none" stroke="#a0e8ff" stroke-width="0.6" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- 支脉3 (右上) -->
+  <path d="M36,22 Q40,26 42,30" fill="none" stroke="#2080ff" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- 支脉4 (左分支) -->
+  <path d="M12,34 Q8,36 4,38" fill="none" stroke="#2080ff" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- 支脉5 (右分支) -->
+  <path d="M36,22 Q34,18 32,14" fill="none" stroke="#2080ff" stroke-width="1.2" stroke-linecap="round" opacity="0.4"/>
+
+  <!-- 节点高光(脉冲点) -->
+  <circle cx="18" cy="34" r="2.5" fill="#80e8ff" opacity="0.6" filter="url(#blur2)"/>
+  <circle cx="18" cy="34" r="1.2" fill="#ffffff" opacity="0.9"/>
+
+  <circle cx="26" cy="30" r="2.5" fill="#80e8ff" opacity="0.6" filter="url(#blur2)"/>
+  <circle cx="26" cy="30" r="1.2" fill="#ffffff" opacity="0.9"/>
+
+  <circle cx="36" cy="22" r="2" fill="#80e8ff" opacity="0.5" filter="url(#blur2)"/>
+  <circle cx="36" cy="22" r="1" fill="#ffffff" opacity="0.8"/>
+
+  <circle cx="10" cy="22" r="1.5" fill="#80e8ff" opacity="0.4"/>
+  <circle cx="30" cy="40" r="1.5" fill="#80e8ff" opacity="0.4"/>
+
+  <!-- 漂浮粒子 -->
+  <circle cx="8" cy="10" r="1" fill="#c0f0ff" opacity="0.6"/>
+  <circle cx="42" cy="14" r="0.8" fill="#c0f0ff" opacity="0.5"/>
+  <circle cx="34" cy="8" r="0.7" fill="#c0f0ff" opacity="0.4"/>
+  <circle cx="6" cy="42" r="0.7" fill="#c0f0ff" opacity="0.4"/>
+  <circle cx="44" cy="42" r="0.8" fill="#c0f0ff" opacity="0.3"/>
+  <circle cx="22" cy="4" r="0.6" fill="#c0f0ff" opacity="0.4"/>
+  <circle cx="14" cy="6" r="0.5" fill="#c0f0ff" opacity="0.3"/>
+</svg>

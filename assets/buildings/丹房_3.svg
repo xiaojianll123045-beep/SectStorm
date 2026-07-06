@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <rect x="0" y="0" width="96" height="96" fill="#8a8278"/>
+
+  <!-- 大院 -->
+  <rect x="3" y="26" width="90" height="52" rx="1" fill="none" stroke="#909080" stroke-width="1"/>
+
+  <!-- 左药棚 -->
+  <rect x="5" y="36" width="22" height="28" rx="0.5" fill="#d0c0a8"/>
+  <polygon points="3,38 12,28 29,38" fill="#505038" stroke="#383828" stroke-width="0.4"/>
+  <!-- 右药棚 -->
+  <rect x="69" y="36" width="22" height="28" rx="0.5" fill="#d0c0a8"/>
+  <polygon points="73,38 84,28 93,38" fill="#505038" stroke="#383828" stroke-width="0.4"/>
+
+  <!-- 主殿台基 -->
+  <rect x="22" y="30" width="52" height="46" rx="1" fill="#c8c0b0" stroke="#b0a898" stroke-width="0.6"/>
+
+  <!-- 大殿 -->
+  <rect x="26" y="34" width="44" height="38" rx="0.5" fill="#c8b090" stroke="#a89070" stroke-width="0.5"/>
+
+  <!-- 柱 -->
+  <rect x="26" y="34" width="3" height="38" fill="#a08060"/>
+  <rect x="67" y="34" width="3" height="38" fill="#a08060"/>
+
+  <!-- 巨炉 -->
+  <circle cx="48" cy="56" r="12" fill="#705040" stroke="#503020" stroke-width="0.6"/>
+  <circle cx="48" cy="56" r="9" fill="#806850"/>
+  <circle cx="48" cy="56" r="6" fill="#907860"/>
+  <ellipse cx="48" cy="46" rx="6" ry="2.5" fill="#503020"/>
+  <ellipse cx="48" cy="46" rx="4" ry="1.5" fill="#ff9030" opacity="0.8"/>
+  <ellipse cx="48" cy="46" rx="2" ry="1" fill="#ffc060"/>
+
+  <!-- 炉纹 -->
+  <path d="M42,56 L54,56 M42,60 L54,60" stroke="#604030" stroke-width="0.3"/>
+
+  <!-- 炉耳 -->
+  <path d="M38,52 Q36,50 38,48" fill="none" stroke="#705040" stroke-width="1.5"/>
+  <path d="M58,52 Q60,50 58,48" fill="none" stroke="#705040" stroke-width="1.5"/>
+
+  <!-- 烟囱 -->
+  <rect x="45" y="20" width="6" height="16" rx="1" fill="#605040"/>
+
+  <!-- 彩烟(三色) -->
+  <path d="M48,18 Q42,12 48,6 Q54,0 48,-4" fill="none" stroke="#ff4040" stroke-width="3" opacity="0.3" stroke-linecap="round"/>
+  <path d="M48,18 Q54,12 48,6 Q42,0 48,-4" fill="none" stroke="#4080ff" stroke-width="2.5" opacity="0.25" stroke-linecap="round"/>
+  <path d="M48,18 Q48,12 48,6 Q48,0 48,-4" fill="none" stroke="#80ff40" stroke-width="2" opacity="0.2" stroke-linecap="round"/>
+
+  <!-- 三檐 -->
+  <path d="M12,34 L22,18 L74,18 L84,34 Q78,32 74,36 L22,36 Q18,32 12,34 Z" fill="#504838" stroke="#383028" stroke-width="0.6"/>
+  <path d="M18,26 L26,12 L70,12 L78,26 Q72,24 68,28 L28,28 Q24,24 18,26 Z" fill="#403828" stroke="#282018" stroke-width="0.6"/>
+  <path d="M24,18 L30,6 L66,6 L72,18 Q66,16 62,20 L34,20 Q30,16 24,18 Z" fill="#302818" stroke="#181008" stroke-width="0.6"/>
+
+  <!-- 正脊 -->
+  <line x1="30" y1="6" x2="66" y2="6" stroke="#d4a030" stroke-width="1.5"/>
+  <circle cx="48" cy="5" r="1.5" fill="#ffd040"/>
+
+  <!-- 飞檐 -->
+  <path d="M12,34 Q10,30 14,28" fill="none" stroke="#504838" stroke-width="1" stroke-linecap="round"/>
+  <path d="M84,34 Q86,30 82,28" fill="none" stroke="#504838" stroke-width="1" stroke-linecap="round"/>
+
+  <!-- 门 -->
+  <rect x="44" y="56" width="8" height="16" rx="0.5" fill="#3a2010"/>
+
+  <!-- 阶 -->
+  <rect x="36" y="76" width="24" height="3" rx="0.3" fill="#d0c8b8"/>
+
+  <!-- 院门 -->
+  <rect x="42" y="78" width="12" height="2" fill="#3a2010"/>
+</svg>
