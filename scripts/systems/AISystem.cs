@@ -60,7 +60,7 @@ public class AISystem
             targets.Add((e, score));
         }
 
-        var best = targets.Where(t => t.score > 1.3f).OrderByDescending(t => t.score).FirstOrDefault();
+        var best = targets.Where(t => t.score > 1.3f && InWar(t.sect.Id) == false).OrderByDescending(t => t.score).FirstOrDefault();
         if (best.sect != null)
         {
             bool aggr = sect.Personality == AIPersonality.Aggressive || _rng.Next(3) == 0;
@@ -68,7 +68,58 @@ public class AISystem
             {
                 _gm.DeclareWar(sect.Id, best.sect.Id);
                 CreateAIResponseArmy(sect);
+                return;
             }
+        }
+
+        // development: upgrade buildings, merge small armies
+        TryDevelop(sect);
+        MergeArmies(sect);
+    }
+
+    private void MergeArmies(SectData sect)
+    {
+        var myArmies = _gm.Armies.Where(a => a.SectId == sect.Id && a.IsAlive && a.Order != ArmyOrder.Attacking).ToList();
+        for (int i = 0; i < myArmies.Count; i++)
+        {
+            for (int j = i + 1; j < myArmies.Count; j++)
+            {
+                float d = (myArmies[i].Position - myArmies[j].Position).LengthSquared();
+                if (d < 500f) // within 22px
+                {
+                    // merge j into i
+                    myArmies[i].DiscipleIds.AddRange(myArmies[j].DiscipleIds);
+                    myArmies[j].DiscipleIds.Clear();
+                    _gm.Armies.Remove(myArmies[j]);
+                    myArmies.RemoveAt(j);
+                    j--;
+                }
+            }
+        }
+    }
+
+    private void TryDevelop(SectData sect)
+    {
+        if (sect.Lingshi < 80) return;
+        // upgrade cheapest affordable building
+        int[] bLevels = { sect.MeetingHall, sect.CultivationRoom, sect.Library, sect.AlchemyRoom, sect.SpiritField, sect.ProtectionArray };
+        int bestIdx = -1, bestCost = int.MaxValue;
+        for (int i = 0; i < bLevels.Length; i++)
+        {
+            if (bLevels[i] >= 3) continue;
+            int cost = (bLevels[i] + 1) * 100;
+            if (cost < bestCost && sect.Lingshi >= cost) { bestCost = cost; bestIdx = i; }
+        }
+        if (bestIdx < 0) return;
+        sect.Lingshi -= bestCost;
+        switch (bestIdx)
+        {
+            case 0: sect.MeetingHall++; break;
+            case 1: sect.CultivationRoom++; break;
+            case 2: sect.Library++; break;
+            case 3: sect.AlchemyRoom++; break;
+            case 4: sect.SpiritField++; break;
+            case 5: sect.ProtectionArray++; break;
         }
     }
 
@@ -76,17 +127,55 @@ public class AISystem
     {
         int enemyId = war.AttackerSectId == sect.Id ? war.DefenderSectId : war.AttackerSectId;
         if (!HasArmy(sect.Id)) CreateAIResponseArmy(sect);
-        if (!HasArmy(sect.Id) || HasOrder(sect.Id, ArmyOrder.Attacking)) return;
+        if (!HasArmy(sect.Id)) return;
 
-        var targetArmy = GetArmy(enemyId);
-        if (targetArmy != null)
+        var army = GetArmy(sect.Id);
+        if (army == null) return;
+
+        // if army is idle, find a target
+        if (army.Order == ArmyOrder.Idle)
         {
-            var army = GetArmy(sect.Id);
-            if (army != null)
+            // priority 1: attack enemy army
+            var targetArmy = GetArmy(enemyId);
+            if (targetArmy != null)
             {
                 army.AttackTargetArmyId = targetArmy.Id;
                 army.Order = ArmyOrder.Attacking;
+                return;
             }
+
+            // priority 2: attack nearest enemy city
+            var enemyCity = _gm.Locations
+                .Where(l => l.OwnerSectId == enemyId && l.Type == LocationType.City)
+                .OrderBy(l => (l.Position - army.Position).LengthSquared())
+                .FirstOrDefault();
+            if (enemyCity != null)
+            {
+                army.MoveTarget = enemyCity.Position;
+                army.Order = ArmyOrder.Moving;
+                return;
+            }
+
+            // priority 3: attack enemy sect home
+            var enemyHome = _gm.Locations
+                .FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == enemyId);
+            if (enemyHome != null)
+            {
+                army.MoveTarget = enemyHome.Position;
+                army.Order = ArmyOrder.Moving;
+            }
+        }
+
+        // seek peace if losing badly
+        int myCities = sect.ControlledCityIds.Count;
+        int myArmyCount = _gm.Armies.Count(a => a.SectId == sect.Id && a.IsAlive);
+        var enemy = _gm.State.GetSect(enemyId);
+        int enemyCities = enemy?.ControlledCityIds.Count ?? 0;
+        if (war.TurnsActive > 18 && (myArmyCount == 0 || myCities < enemyCities * 0.3f))
+        {
+            war.DefenderProposedPeace = true;
+            war.Ended = true;
+            _gm.State.Log($"{sect.Name} 向 {enemy?.Name} 求和");
         }
     }
 

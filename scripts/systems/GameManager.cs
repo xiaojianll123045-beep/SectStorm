@@ -93,40 +93,48 @@ public partial class GameManager : Node
             }
         }
 
-        // process army movement with territory speed modifier
+        // process army movement with territory restrictions
         foreach (var army in Armies)
         {
             if (!army.IsAlive) continue;
+            if (army.Order != ArmyOrder.Moving && army.Order != ArmyOrder.Attacking) continue;
 
-            // territory speed
-            int owner = OwnerAtPosition(army.Position);
-            float mul = 1f;
-            if (owner == army.SectId) mul = 1f;
-            else if (owner < 0) mul = 0.6f;
-            else
-            {
-                var rel = State.GetRelation(army.SectId, owner);
-                if (rel == null) mul = 0.5f;
-                else if (rel.State == RelationState.Ally) mul = 0.8f;
-                else if (rel.State == RelationState.War) mul = 0.3f;
-                else mul = 0.5f;
-            }
-            float speed = 100f * mul;
+            // determine target position
+            Vector2 targetPos = army.Order == ArmyOrder.Moving ? army.MoveTarget :
+                (army.AttackTargetArmyId >= 0 ? Armies.FirstOrDefault(a => a.Id == army.AttackTargetArmyId)?.Position ?? army.Position : army.Position);
 
-            if (army.Order == ArmyOrder.Moving)
+            if (army.Order == ArmyOrder.Attacking)
             {
-                float dist = (army.MoveTarget - army.Position).Length();
-                if (dist <= speed) { army.Position = army.MoveTarget; army.Order = ArmyOrder.Idle; }
-                else army.Position += (army.MoveTarget - army.Position).Normalized() * speed;
+                var t = Armies.FirstOrDefault(a => a.Id == army.AttackTargetArmyId);
+                if (t == null || !t.IsAlive) { army.Order = ArmyOrder.Idle; continue; }
+                targetPos = t.Position;
             }
-            else if (army.Order == ArmyOrder.Attacking && army.AttackTargetArmyId >= 0)
+
+            // check if target is valid territory
+            float dist = (targetPos - army.Position).Length();
+            if (dist <= 5f)
             {
-                var target = Armies.FirstOrDefault(a => a.Id == army.AttackTargetArmyId);
-                if (target == null || !target.IsAlive) { army.Order = ArmyOrder.Idle; continue; }
-                float dist = (target.Position - army.Position).Length();
-                if (dist <= speed) { army.Position = target.Position; ResolveArmyBattle(army, target); }
-                else army.Position += (target.Position - army.Position).Normalized() * speed;
+                if (army.Order == ArmyOrder.Moving) army.Order = ArmyOrder.Idle;
+                else if (army.Order == ArmyOrder.Attacking) ResolveArmyBattle(army, Armies.First(a => a.Id == army.AttackTargetArmyId));
+                continue;
             }
+
+            // calculate step
+            Vector2 step = (targetPos - army.Position).Normalized() * 100f;
+            if (step.Length() > dist) step = targetPos - army.Position;
+            Vector2 newPos = army.Position + step;
+
+            // block entry to neutral/unauthorized territory
+            int newOwner = OwnerAtPosition(newPos);
+            bool canEnter = (newOwner == army.SectId || newOwner < 0);
+            if (!canEnter && newOwner >= 0)
+            {
+                var rel = State.GetRelation(army.SectId, newOwner);
+                canEnter = (rel != null && (rel.State == RelationState.Ally || rel.State == RelationState.War));
+            }
+            if (!canEnter) continue; // blocked at border
+
+            army.Position = newPos;
         }
 
         // disciples: idle cultivation or army attrition
