@@ -6,8 +6,7 @@ using System.Linq;
 public class AISystem
 {
     private GameManager _gm;
-    private Random _rng = new();
-    private Dictionary<int, List<LocationData>> _cachedLocs = new();
+    private System.Threading.ThreadLocal<Random> _rng = new(() => new Random());
 
     public AISystem(GameManager gm) => _gm = gm;
 
@@ -15,13 +14,15 @@ public class AISystem
 
     public void ProcessAllAi()
     {
-        _cachedLocs.Clear();
-        int done = 0, total = _gm.State.AiSects.Count();
-        foreach (var sect in _gm.State.AiSects.ToList())
+        var sects = _gm.State.AiSects.Where(s => s.IsAlive).ToList();
+        int total = sects.Count;
+        var lockObj = new object();
+        int done = 0;
+
+        System.Threading.Tasks.Parallel.ForEach(sects, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 4 }, sect =>
         {
-            if (!sect.IsAlive) continue;
-            if (sect.LastDecisionTurn == _gm.State.TotalTurns) continue;
-            sect.LastDecisionTurn = _gm.State.TotalTurns;
+            if (sect.LastDecisionTurn == _gm.State.TotalTurns) return;
+            lock (sect) { sect.LastDecisionTurn = _gm.State.TotalTurns; }
 
             try
             {
@@ -34,14 +35,12 @@ public class AISystem
             }
             catch (Exception e)
             {
-                GD.PrintErr($"[AI] Error processing {sect.Name}: {e.Message}");
+                GD.PrintErr($"[AI] Error {sect.Name}: {e.Message}");
             }
 
-            done++;
-            _gm.AiProgress = done;
-            if (done % 50 == 0)
-                System.Threading.Thread.Sleep(1); // let UI breathe
-        }
+            lock (lockObj) { done++; _gm.AiProgress = done; }
+        });
+
         GD.Print($"  [AI] done {done}/{total} sects");
     }
 
@@ -71,7 +70,7 @@ public class AISystem
         var best = reachable.Where(t => t.score > 1.3f).OrderByDescending(t => t.score).FirstOrDefault();
         if (best.sect != null)
         {
-            bool aggr = sect.Personality == AIPersonality.Aggressive || _rng.Next(3) == 0;
+            bool aggr = sect.Personality == AIPersonality.Aggressive || _rng.Value.Next(3) == 0;
             if (aggr)
             {
                 _gm.DeclareWar(sect.Id, best.sect.Id);
@@ -260,10 +259,8 @@ public class AISystem
     private bool SharesBorderCached(SectData a, SectData b)
     {
         if (a == null || b == null) return false;
-        if (!_cachedLocs.TryGetValue(a.Id, out var aLocs))
-            _cachedLocs[a.Id] = aLocs = _gm.Locations.Where(l => l.OwnerSectId == a.Id).ToList();
-        if (!_cachedLocs.TryGetValue(b.Id, out var bLocs))
-            _cachedLocs[b.Id] = bLocs = _gm.Locations.Where(l => l.OwnerSectId == b.Id).ToList();
+        var aLocs = _gm.Locations.Where(l => l.OwnerSectId == a.Id).ToList();
+        var bLocs = _gm.Locations.Where(l => l.OwnerSectId == b.Id).ToList();
         float rangeSq = 500f * 500f;
         foreach (var al in aLocs)
             foreach (var bl in bLocs)
