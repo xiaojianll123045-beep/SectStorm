@@ -69,23 +69,23 @@ public partial class GameManager : Node
         State.Log("游戏开始");
     }
 
-    private void OnTimerTick()
+    public override void _Process(double delta)
     {
+        // check AI completion every frame
         if (_aiTask != null && _aiTask.IsCompleted)
         {
-            GD.Print($"[DEBUG] AI task completed");
             _aiTask = null;
             AiProgress = AiTotal;
             AiProcessing = false;
             GD.Print($"  AI done, resuming turns");
             _turnTimer.Start();
-            return;
         }
-        if (_turnRunning || AiProcessing)
-        {
-            _turnTimer.Start(0.01f);
-            return;
-        }
+    }
+
+    private void OnTimerTick()
+    {
+        if (_turnRunning || AiProcessing) return;
+
         _turnRunning = true;
         var t0 = Time.GetTicksMsec();
         try { ProcessTurn(); }
