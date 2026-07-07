@@ -49,6 +49,7 @@ public partial class GameManager : Node
 
     private bool _turnRunning;
     private bool _paused;
+    private System.Threading.Tasks.Task _aiTask;
 
     public void SetPaused(bool p)
     {
@@ -233,25 +234,28 @@ public partial class GameManager : Node
             if (war.Ended) Wars.Remove(war);
         }
 
-        // AI (main thread, with progress)
-        if (State.TotalTurns % 9 == 0)
+        // AI (background thread, pauses turn timer)
+        if (State.TotalTurns % 9 == 0 && _aiTask == null)
         {
-            GD.Print($"  AI start...");
+            GD.Print($"  AI start (background)...");
             AiProcessing = true;
             AiTotal = _ai.BatchCount();
             AiProgress = 0;
-            try
-            {
-                var t0 = Time.GetTicksMsec();
-                _ai.ProcessAllAi();
-                GD.Print($"  AI done ({Time.GetTicksMsec() - t0}ms)");
-            }
-            catch (System.Exception e)
-            {
-                GD.PrintErr($"[Game] AI error: {e.Message}\n{e.StackTrace}");
-            }
+            _turnTimer.Stop();
+            _aiTask = System.Threading.Tasks.Task.Run(() => {
+                try { _ai.ProcessAllAi(); }
+                catch (System.Exception e) { GD.PrintErr($"[Game] AI task error: {e.Message}"); }
+            });
+        }
+        // check if AI task completed
+        if (_aiTask != null && _aiTask.IsCompleted)
+        {
+            _aiTask = null;
             AiProgress = AiTotal;
             AiProcessing = false;
+            GD.Print($"  AI done, resuming turns");
+            _turnRunning = false;
+            _turnTimer.Start();
         }
 
         // AI disciple recruitment (every 3 turns)
@@ -358,7 +362,7 @@ public partial class GameManager : Node
             Position = pos,
             ResolveDisciple = (id) => State.Disciples.FirstOrDefault(d => d.Id == id),
         };
-        Armies.Add(army);
+        lock (Armies) { Armies.Add(army); }
         return army;
     }
 
@@ -370,7 +374,7 @@ public partial class GameManager : Node
     public WarData DeclareWar(int attackerId, int defenderId)
     {
         var war = WarSystem.DeclareWar(attackerId, defenderId);
-        Wars.Add(war);
+        lock (Wars) { Wars.Add(war); }
         var atk = State.GetSect(attackerId);
         var def = State.GetSect(defenderId);
         State.Log($"{atk?.Name} 对 {def?.Name} 宣战！");

@@ -43,9 +43,6 @@ public partial class PauseMenu : Control
         AddBtn(vbox, "继续游戏", () => { Visible = false; _open = false; });
         AddBtn(vbox, "保存游戏", () => ShowSlots(true));
         AddBtn(vbox, "读取存档", () => ShowSlots(false));
-        AddBtn(vbox, "宗门面板", () => { Visible = false; _open = false; EmitSignal(nameof(OpenSectPanel)); });
-        AddBtn(vbox, "外交", () => { Visible = false; _open = false; EmitSignal(nameof(OpenDiplomacy)); });
-        AddBtn(vbox, "编组部队", () => { Visible = false; _open = false; EmitSignal(nameof(OpenArmyCreator)); });
         AddBtn(vbox, "返回主菜单", () => GetTree().ChangeSceneToFile("res://scenes/menu.tscn"));
         AddBtn(vbox, "退出游戏", () => GetTree().Quit());
     }

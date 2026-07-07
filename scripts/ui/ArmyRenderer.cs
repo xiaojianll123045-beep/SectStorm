@@ -59,7 +59,9 @@ public partial class ArmyRenderer : Node2D
         int playerSectId = _gm.State.PlayerSectId;
         var validIds = new HashSet<int>();
 
-        foreach (var army in _gm.Armies)
+        List<ArmyData> armiesSnapshot;
+        lock (_gm.Armies) { armiesSnapshot = new List<ArmyData>(_gm.Armies); }
+        foreach (var army in armiesSnapshot)
         {
             if (!army.IsAlive) continue;
             validIds.Add(army.Id);
