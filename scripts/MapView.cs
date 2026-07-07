@@ -73,30 +73,30 @@ public partial class MapView : Node2D
 
         var pauseMenu = new PauseMenu();
         pauseMenu.Name = "PauseMenu";
-        pauseMenu.OpenSectPanel += () => GetNodeOrNull<SectPanel>("SectPanel")?.Toggle();
-        pauseMenu.OpenDiplomacy += () => GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel")?.Toggle();
-        pauseMenu.OpenArmyCreator += () => GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Show();
-        AddChild(pauseMenu);
+        pauseMenu.OpenSectPanel += () => canvas.GetNodeOrNull<SectPanel>("UI/SectPanel")?.Toggle();
+        pauseMenu.OpenDiplomacy += () => canvas.GetNodeOrNull<DiplomacyPanel>("UI/DiplomacyPanel")?.Toggle();
+        pauseMenu.OpenArmyCreator += () => canvas.GetNodeOrNull<ArmyCreator>("UI/ArmyCreator")?.Show();
+        canvas.AddChild(pauseMenu);
 
         var sectPanel = new SectPanel();
         sectPanel.Name = "SectPanel";
-        AddChild(sectPanel);
+        canvas.AddChild(sectPanel);
 
         var diploPanel = new DiplomacyPanel();
         diploPanel.Name = "DiplomacyPanel";
-        AddChild(diploPanel);
+        canvas.AddChild(diploPanel);
 
         var armyCreator = new ArmyCreator();
         armyCreator.Name = "ArmyCreator";
-        AddChild(armyCreator);
+        canvas.AddChild(armyCreator);
 
         var eventPopup = new EventPopup();
         eventPopup.Name = "EventPopup";
-        AddChild(eventPopup);
+        canvas.AddChild(eventPopup);
 
         var toast = new Toast();
         toast.Name = "Toast";
-        AddChild(toast);
+        canvas.AddChild(toast);
 
         var warRenderer = new WarRenderer();
         warRenderer.Name = "WarRenderer";
@@ -381,7 +381,7 @@ public partial class MapView : Node2D
             var gm = GetNodeOrNull<GameManager>("GameManager");
             if (gm != null && gm.PendingEvents.TryDequeue(out var ev))
             {
-                var popup = GetNodeOrNull<EventPopup>("EventPopup");
+                var popup = GetNodeOrNull<EventPopup>("UI/EventPopup");
                 if (popup != null)
                 {
                     var options = new System.Collections.Generic.List<(string, System.Action)>();
@@ -398,15 +398,15 @@ public partial class MapView : Node2D
         {
             if (k.Keycode == Key.Escape)
             {
-                if (GetNodeOrNull<PauseMenu>("PauseMenu")?.Visible == true) { GetNodeOrNull<PauseMenu>("PauseMenu")?.Toggle(); return; }
-                if (GetNodeOrNull<SectPanel>("SectPanel")?.Visible == true) { GetNodeOrNull<SectPanel>("SectPanel")?.Toggle(); return; }
-                if (GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel")?.Visible == true) { GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel")?.Toggle(); return; }
-                if (GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Visible == true) { GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Hide(); return; }
-                GetNodeOrNull<PauseMenu>("PauseMenu")?.Toggle();
+                if (GetNodeOrNull<PauseMenu>("UI/PauseMenu")?.Visible == true) { GetNodeOrNull<PauseMenu>("UI/PauseMenu")?.Toggle(); return; }
+                if (GetNodeOrNull<SectPanel>("UI/SectPanel")?.Visible == true) { GetNodeOrNull<SectPanel>("UI/SectPanel")?.Toggle(); return; }
+                if (GetNodeOrNull<DiplomacyPanel>("UI/DiplomacyPanel")?.Visible == true) { GetNodeOrNull<DiplomacyPanel>("UI/DiplomacyPanel")?.Toggle(); return; }
+                if (GetNodeOrNull<ArmyCreator>("UI/ArmyCreator")?.Visible == true) { GetNodeOrNull<ArmyCreator>("UI/ArmyCreator")?.Hide(); return; }
+                GetNodeOrNull<PauseMenu>("UI/PauseMenu")?.Toggle();
             }
 
-            if (k.Keycode == Key.D) { var dp = GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel"); if (dp != null && !dp.Visible) dp.Toggle(); }
-            if (k.Keycode == Key.A) GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Show();
+            if (k.Keycode == Key.D) { var dp = GetNodeOrNull<DiplomacyPanel>("UI/DiplomacyPanel"); if (dp != null && !dp.Visible) dp.Toggle(); }
+            if (k.Keycode == Key.A) GetNodeOrNull<ArmyCreator>("UI/ArmyCreator")?.Show();
             if (k.Keycode == Key.L) GetNodeOrNull<GameUI>("UI/GameUI")?.ToggleLog();
         }
         if (@event is InputEventMouseButton mb && mb.Pressed)

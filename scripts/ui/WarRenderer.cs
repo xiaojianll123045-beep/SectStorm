@@ -13,6 +13,7 @@ public partial class WarRenderer : Node2D
     public override void _Process(double delta)
     {
         if (_gm == null) _gm = GetNodeOrNull<GameManager>("../GameManager");
+        if (_gm == null) _gm = GetNodeOrNull<GameManager>("GameManager");
         if (_gm == null) return;
 
         // clear old arrows

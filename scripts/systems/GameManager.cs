@@ -133,7 +133,7 @@ public partial class GameManager : Node
                         if (newSect != null) newSect.ControlledCityIds.Add(targetLoc.Id);
                         State.Log($"{army.Name} 攻占了 {targetLoc.Name}");
                         // toast notification
-                        var toast = GetNodeOrNull<Toast>("/root/MapView/Toast");
+                        var toast = GetNodeOrNull<Toast>("/root/MapView/UI/Toast");
                         toast?.ShowMessage($"{newSect?.Name ?? "?"} 攻占了 {targetLoc.Name}");
                     }
                     army.Order = ArmyOrder.Idle;
