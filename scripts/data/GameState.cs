@@ -10,6 +10,7 @@ public class GameState
     public int Xun = 1;  // 1-36 (旬)
     public int PlayerSectId;
     public List<SectData> Sects = new();
+    public Dictionary<int, SectData> SectMap = new();
     public List<DiscipleData> Disciples = new();
     public List<RelationData> Relations = new();
     public Dictionary<(int, int), RelationData> RelationMap = new();
@@ -18,7 +19,7 @@ public class GameState
 
     public int TotalTurns => (Year - 1) * 36 + Xun;
 
-    public SectData GetSect(int id) => Sects.FirstOrDefault(s => s.Id == id);
+    public SectData GetSect(int id) => SectMap.TryGetValue(id, out var s) ? s : null;
     public SectData PlayerSect => GetSect(PlayerSectId);
     public List<SectData> AiSects => Sects.Where(s => !s.IsPlayer && s.IsAlive).ToList();
 

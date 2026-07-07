@@ -191,6 +191,7 @@ public partial class MapView : Node2D
                     SpiritVein = 100,
                 };
                 gm.State.Sects.Add(sd);
+                gm.State.SectMap[sd.Id] = sd;
             }
         }
 
