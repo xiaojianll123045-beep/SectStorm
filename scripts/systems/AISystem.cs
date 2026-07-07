@@ -304,8 +304,12 @@ public class AISystem
         var fromHome = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == from.Id);
         var toHome = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == to.Id);
         if (fromHome == null || toHome == null) return false;
-        var path = PathFinder.FindPath(fromHome.Position, toHome.Position, from.Id, _gm.State, _gm.Locations);
-        return path != null;
+        // must be within reasonable range (2000px) or share a border
+        float dx = fromHome.Position.X - toHome.Position.X;
+        float dy = fromHome.Position.Y - toHome.Position.Y;
+        float distSq = dx * dx + dy * dy;
+        if (distSq > 2000f * 2000f && !SharesBorderCached(from, to)) return false;
+        return true;
     }
 
     private void CreateAIResponseArmy(SectData sect)

@@ -189,7 +189,28 @@ public partial class GameManager : Node
             if (wpDist <= 10f)
             {
                 army.PathWaypoints.RemoveAt(0);
-                if (army.PathWaypoints.Count == 0) { army.Order = ArmyOrder.Idle; continue; }
+                if (army.PathWaypoints.Count == 0)
+                {
+                    // path complete - try to capture
+                    var targetLoc = Locations.FirstOrDefault(l => (l.Position - targetPos).Length() < 100f);
+                    if (targetLoc != null && targetLoc.OwnerSectId != army.SectId && targetLoc.OwnerSectId >= 0)
+                    {
+                        int prevOwner = targetLoc.OwnerSectId;
+                        targetLoc.OwnerSectId = army.SectId;
+                        targetLoc.Influence.Clear();
+                        targetLoc.AddInfluence(army.SectId, 100);
+                        targetLoc.Prosperity = Mathf.Max(10, targetLoc.Prosperity - 10);
+                        var prevSect = State.GetSect(prevOwner);
+                        if (prevSect != null) prevSect.ControlledCityIds.Remove(targetLoc.Id);
+                        var newSect = State.GetSect(army.SectId);
+                        if (newSect != null) newSect.ControlledCityIds.Add(targetLoc.Id);
+                        State.Log($"{army.Name} 攻占了 {targetLoc.Name}");
+                        var toast = GetNodeOrNull<Toast>("/root/MapView/UI/Toast");
+                        toast?.ShowMessage($"{newSect?.Name ?? "?"} 攻占了 {targetLoc.Name}");
+                    }
+                    army.Order = ArmyOrder.Idle;
+                    continue;
+                }
                 wp = army.PathWaypoints[0];
                 wpDist = (wp - army.Position).Length();
             }

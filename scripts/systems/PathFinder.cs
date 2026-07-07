@@ -38,9 +38,7 @@ public static class PathFinder
             }
             if (owner < 0) return true;
             if (owner == armySectId) return true;
-            var rel = state.GetRelation(armySectId, owner);
-            if (rel == null) return false;
-            return rel.State == RelationState.Ally || rel.State == RelationState.War;
+            return true; // allow all territory for pathfinding
         }
 
         // A*
