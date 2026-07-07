@@ -364,9 +364,26 @@ public partial class MapView : Node2D
 
         _info.Text = $"Seed: {_seed}  |  城{CountType(LocationType.City)} 村{CountType(LocationType.Village)} 宗{CountType(LocationType.Sect)}  |  {MapWidth}x{MapHeight}";
 
-        // skip hover if pause menu is open
-        var pauseMenu = GetNodeOrNull<PauseMenu>("UI/PauseMenu");
-        bool paused = pauseMenu != null && pauseMenu.Visible;
+        // skip hover if any modal is open (check CanvasLayer children)
+        bool paused = false;
+        var uiLayer = GetNodeOrNull<CanvasLayer>("UI");
+        if (uiLayer != null)
+        {
+            foreach (var c in uiLayer.GetChildren())
+                if (c is Control control && control.Visible)
+                { paused = true; break; }
+        }
+        // also check modals added directly to MapView
+        if (!paused)
+        {
+            foreach (var c in GetChildren())
+            {
+                if (!(c is Control)) continue;
+                var name = ((Control)c).GetType().Name;
+                if (((Control)c).Visible && (name.EndsWith("Panel") || name == "PauseMenu" || name == "ArmyCreator" || name == "EventPopup"))
+                { paused = true; break; }
+            }
+        }
 
         // territory-based hover
         Vector2 mouseWorld = GetGlobalMousePosition();
