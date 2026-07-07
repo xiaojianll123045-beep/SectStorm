@@ -9,6 +9,7 @@ public partial class GameManager : Node
     public bool AiProcessing;
     public int AiProgress;
     public int AiTotal;
+    public System.Collections.Concurrent.ConcurrentQueue<(string title, string desc, System.Action callback)> PendingEvents = new();
     public List<LocationData> Locations = new();
     public List<ArmyData> Armies = new();
     public List<WarData> Wars = new();

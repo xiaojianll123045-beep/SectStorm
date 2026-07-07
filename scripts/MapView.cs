@@ -90,6 +90,10 @@ public partial class MapView : Node2D
         armyCreator.Name = "ArmyCreator";
         AddChild(armyCreator);
 
+        var eventPopup = new EventPopup();
+        eventPopup.Name = "EventPopup";
+        AddChild(eventPopup);
+
         _info = new Label();
         _info.Name = "Info";
         _info.Position = new Vector2(10, 10);
@@ -343,6 +347,7 @@ public partial class MapView : Node2D
     }
 
     private ulong _lastFrameTime;
+    private float _eventCheckTimer;
 
     public override void _Process(double delta)
     {
@@ -372,6 +377,24 @@ public partial class MapView : Node2D
             Vector2 pos = LocationPos(_hoveredIdx);
             Vector2 screen = _camera.GetCanvasTransform() * pos;
             _tooltip.Position = screen + new Vector2(-_tooltip.Size.X - 10, -10);
+        }
+
+        // check pending events
+        _eventCheckTimer += (float)delta;
+        if (_eventCheckTimer > 0.5f)
+        {
+            _eventCheckTimer = 0;
+            var gm = GetNodeOrNull<GameManager>("GameManager");
+            if (gm != null && gm.PendingEvents.TryDequeue(out var ev))
+            {
+                var popup = GetNodeOrNull<EventPopup>("EventPopup");
+                if (popup != null)
+                {
+                    var options = new System.Collections.Generic.List<(string, System.Action)>();
+                    options.Add(("确定", ev.callback));
+                    popup.ShowEvent(ev.title, ev.desc, options);
+                }
+            }
         }
     }
 
@@ -409,10 +432,52 @@ public partial class MapView : Node2D
                 {
                     var loc = _locations[seedIdx];
                     var items = new List<(string, System.Action)>();
-                    items.Add(($"查看 {loc.Name}", () => ShowDebugInfo(loc)));
+                    items.Add(($"查看", () => ShowDebugInfo(loc)));
+                    var gm = GetNodeOrNull<GameManager>("GameManager");
+
+                    if (loc.Type == LocationType.City && gm != null)
+                    {
+                        var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name);
+                        if (ld != null)
+                        {
+                            var playerSect = gm.State.PlayerSect;
+                            if (playerSect != null)
+                            {
+                                items.Add(($"驻守弟子", () =>
+                                {
+                                    var idle = gm.State.Disciples.FirstOrDefault(d => d.SectId == playerSect.Id && d.State == "idle" && !gm.Armies.Any(a => a.DiscipleIds.Contains(d.Id)));
+                                    if (idle != null)
+                                    {
+                                        ld.AddInfluence(playerSect.Id, 10);
+                                        gm.State.Log($"{idle.Name} 驻守 {loc.Name}");
+                                    }
+                                }));
+                                items.Add(($"援助物资", () =>
+                                {
+                                    if (playerSect.Lingshi >= 50)
+                                    {
+                                        playerSect.Lingshi -= 50;
+                                        ld.Prosperity += 5;
+                                        ld.AddInfluence(playerSect.Id, 15);
+                                        gm.State.Log($"援助 {loc.Name} (+5繁荣, +15影响力)");
+                                    }
+                                }));
+                                items.Add(($"收徒", () =>
+                                {
+                                    var idle = gm.State.Disciples.FirstOrDefault(d => d.SectId == playerSect.Id && d.State == "idle" && !gm.Armies.Any(a => a.DiscipleIds.Contains(d.Id)));
+                                    if (idle != null)
+                                    {
+                                        ld.AddInfluence(playerSect.Id, 5);
+                                        // recruit from this location
+                                        gm.CreateDisciple($"新弟子{gm.State.NextDiscipleId}", playerSect.Id, ld);
+                                        gm.State.Log($"从 {loc.Name} 收徒");
+                                    }
+                                }));
+                            }
+                        }
+                    }
                     if (loc.Type == LocationType.Sect)
                     {
-                        var gm = GetNodeOrNull<GameManager>("GameManager");
                         var sd = gm?.State.GetSect(loc.OwnerIndex);
                         if (sd != null)
                             items.Add(($"宗门详情", () => ui?.ShowSectInfo(sd)));
