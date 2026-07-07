@@ -9,14 +9,21 @@ public class AISystem
 
     public AISystem(GameManager gm) => _gm = gm;
 
+    private int _aiCount;
+    private int _aiSlowCount;
+
     public void ProcessAllAi()
     {
+        _aiCount = 0;
+        _aiSlowCount = 0;
+        int done = 0, total = _gm.State.AiSects.Count();
         foreach (var sect in _gm.State.AiSects.ToList())
         {
             if (!sect.IsAlive) continue;
             if (sect.LastDecisionTurn == _gm.State.TotalTurns) continue;
             sect.LastDecisionTurn = _gm.State.TotalTurns;
 
+            var t0 = Time.GetTicksMsec();
             var myWar = _gm.Wars.FirstOrDefault(w =>
                 (w.AttackerSectId == sect.Id || w.DefenderSectId == sect.Id) && !w.Ended);
 
@@ -24,7 +31,13 @@ public class AISystem
                 ProcessWarAI(sect, myWar);
             else
                 ProcessPeaceAI(sect);
+
+            int dt = (int)(Time.GetTicksMsec() - t0);
+            if (dt > 50) GD.Print($"  [AI] {sect.Name} took {dt}ms");
+            done++;
+            if (done % 100 == 0) GD.Print($"  [AI] {done}/{total} sects processed");
         }
+        GD.Print($"  [AI] done {done}/{total} sects");
     }
 
     private void ProcessPeaceAI(SectData sect)
@@ -41,7 +54,7 @@ public class AISystem
             float score = ePower > 0 ? (float)myPower / ePower : 3f;
 
             // bonus for adjacent territory
-            if (SharesBorder(sect, e)) score *= 1.5f;
+            if (SharesBorder_cached(sect, e)) score *= 1.5f;
             targets.Add((e, score));
         }
 
@@ -113,6 +126,8 @@ public class AISystem
         _gm.CreateArmy(sect.Id, disciples.Select(d => d.Id).ToList(), home.Position);
     }
 
+    private Dictionary<int, List<LocationData>> _cachedSectLocs = new();
+
     private List<SectData> FindEnemies(SectData sect)
     {
         var result = new List<SectData>();
@@ -122,34 +137,40 @@ public class AISystem
             var rel = _gm.State.GetRelation(sect.Id, other.Id);
             if (rel != null && rel.Favor < -20) result.Add(other);
         }
-        // also target owners of adjacent un-allied territory
+        // build location cache for this tick
+        _cachedSectLocs.Clear();
+        var checkedOwners = new HashSet<int>();
         foreach (var loc in _gm.Locations)
         {
             if (loc.OwnerSectId < 0 || loc.OwnerSectId == sect.Id) continue;
             var rel = _gm.State.GetRelation(sect.Id, loc.OwnerSectId);
             if (rel != null && rel.State == RelationState.Ally) continue;
-            if (SharesBorder(sect, _gm.State.GetSect(loc.OwnerSectId)))
+            if (checkedOwners.Contains(loc.OwnerSectId)) continue;
+            checkedOwners.Add(loc.OwnerSectId);
+
+            var other = _gm.State.GetSect(loc.OwnerSectId);
+            if (other == null) continue;
+            if (SharesBorder_cached(sect, other))
             {
-                var other = _gm.State.GetSect(loc.OwnerSectId);
-                if (other != null && !result.Contains(other))
-                    result.Add(other);
+                if (!result.Contains(other)) result.Add(other);
             }
         }
         return result;
     }
 
-    private int EstimatePower(SectData sect)
-    {
-        return sect.ControlledCityIds.Count * 10
-            + _gm.State.Disciples.Count(d => d.SectId == sect.Id) * 5
-            + _gm.Armies.Where(a => a.SectId == sect.Id).Sum(a => a.EffectiveCombat);
-    }
-
-    private bool SharesBorder(SectData a, SectData b)
+    private bool SharesBorder_cached(SectData a, SectData b)
     {
         if (a == null || b == null) return false;
-        var aLocs = _gm.Locations.Where(l => l.OwnerSectId == a.Id).ToList();
-        var bLocs = _gm.Locations.Where(l => l.OwnerSectId == b.Id).ToList();
+        if (!_cachedSectLocs.TryGetValue(a.Id, out var aLocs))
+        {
+            aLocs = _gm.Locations.Where(l => l.OwnerSectId == a.Id).ToList();
+            _cachedSectLocs[a.Id] = aLocs;
+        }
+        if (!_cachedSectLocs.TryGetValue(b.Id, out var bLocs))
+        {
+            bLocs = _gm.Locations.Where(l => l.OwnerSectId == b.Id).ToList();
+            _cachedSectLocs[b.Id] = bLocs;
+        }
         float rangeSq = 500f * 500f;
         foreach (var al in aLocs)
             foreach (var bl in bLocs)
@@ -160,4 +181,12 @@ public class AISystem
             }
         return false;
     }
+
+    private int EstimatePower(SectData sect)
+    {
+        return sect.ControlledCityIds.Count * 10
+            + _gm.State.Disciples.Count(d => d.SectId == sect.Id) * 5
+            + _gm.Armies.Where(a => a.SectId == sect.Id).Sum(a => a.EffectiveCombat);
+    }
+
 }
