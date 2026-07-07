@@ -58,6 +58,14 @@ public partial class MapView : Node2D
         canvas.Name = "UI";
         AddChild(canvas);
 
+        var armyRenderer = new ArmyRenderer();
+        armyRenderer.Name = "ArmyRenderer";
+        AddChild(armyRenderer);
+
+        var gameUI = new GameUI();
+        gameUI.Name = "GameUI";
+        canvas.AddChild(gameUI);
+
         _info = new Label();
         _info.Name = "Info";
         _info.Position = new Vector2(10, 10);
@@ -101,10 +109,24 @@ public partial class MapView : Node2D
 
         _camera.WorldW = MapWidth;
         _camera.WorldH = MapHeight;
-        _camera.Position = new Vector2(MapWidth / 2f, MapHeight / 2f);
 
-        // init game systems
+        // init game systems first to get player sect
         InitGame();
+
+        // center camera on player's sect mountain gate, zoomed out
+        var gm2 = GetNodeOrNull<GameManager>("GameManager");
+        if (gm2 != null)
+        {
+            var playerSect = gm2.State.PlayerSect;
+            if (playerSect != null)
+            {
+                var sectLoc = gm2.Locations.FirstOrDefault(l =>
+                    l.Type == LocationType.Sect && l.OwnerSectId == playerSect.Id);
+                if (sectLoc != null)
+                    _camera.Position = sectLoc.Position;
+            }
+        }
+        _camera.Zoom = new Vector2(3.0f, 3.0f);
     }
 
     private void InitGame()
@@ -128,7 +150,7 @@ public partial class MapView : Node2D
                 {
                     Id = gm.State.Sects.Count,
                     Name = loc.Name,
-                    IsPlayer = gm.State.Sects.Count == 0,
+                    IsPlayer = false,
                     Lingshi = 200,
                     Prestige = 50,
                     SpiritVein = 100,
@@ -137,21 +159,27 @@ public partial class MapView : Node2D
             }
         }
 
-        // assign city/village ownership
+        // pick a random sect as player
+        int playerIdx = 0;
+        if (gm.State.Sects.Count > 0)
+        {
+            playerIdx = (int)(GD.Randi() % gm.State.Sects.Count);
+            gm.State.Sects[playerIdx].IsPlayer = true;
+            GD.Print($"[MapView] 玩家宗门: {gm.State.Sects[playerIdx].Name}");
+        }
+
+        // assign ownership for all locations
         for (int i = 0; i < _locations.Count; i++)
         {
             var loc = _locations[i];
-            if (loc.Type == LocationType.City || loc.Type == LocationType.Village)
+            if (loc.OwnerIndex >= 0 && loc.OwnerIndex < gm.State.Sects.Count)
             {
-                if (loc.OwnerIndex >= 0 && loc.OwnerIndex < gm.State.Sects.Count)
-                {
-                    var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name && l.Type == loc.Type);
-                    if (ld != null) ld.OwnerSectId = gm.State.Sects[loc.OwnerIndex].Id;
-                }
+                var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name && l.Type == loc.Type);
+                if (ld != null) ld.OwnerSectId = gm.State.Sects[loc.OwnerIndex].Id;
             }
         }
 
-        gm.InitSects(0);
+        gm.InitSects(playerIdx);
         gm.StartGameLoop();
         GD.Print("[MapView] game systems initialized");
     }
