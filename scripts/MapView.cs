@@ -364,26 +364,12 @@ public partial class MapView : Node2D
 
         _info.Text = $"Seed: {_seed}  |  城{CountType(LocationType.City)} 村{CountType(LocationType.Village)} 宗{CountType(LocationType.Sect)}  |  {MapWidth}x{MapHeight}";
 
-        // skip hover if any modal is open (check CanvasLayer children)
-        bool paused = false;
-        var uiLayer = GetNodeOrNull<CanvasLayer>("UI");
-        if (uiLayer != null)
-        {
-            foreach (var c in uiLayer.GetChildren())
-                if (c is Control control && control.Visible)
-                { paused = true; break; }
-        }
-        // also check modals added directly to MapView
-        if (!paused)
-        {
-            foreach (var c in GetChildren())
-            {
-                if (!(c is Control)) continue;
-                var name = ((Control)c).GetType().Name;
-                if (((Control)c).Visible && (name.EndsWith("Panel") || name == "PauseMenu" || name == "ArmyCreator" || name == "EventPopup"))
-                { paused = true; break; }
-            }
-        }
+        // skip hover if any modal overlay is open
+        bool paused = GetNodeOrNull<PauseMenu>("UI/PauseMenu")?.Visible == true
+            || GetNodeOrNull<DiplomacyPanel>("UI/DiplomacyPanel")?.Visible == true
+            || GetNodeOrNull<SectPanel>("UI/SectPanel")?.Visible == true
+            || GetNodeOrNull<ArmyCreator>("UI/ArmyCreator")?.Visible == true
+            || GetNodeOrNull<EventPopup>("UI/EventPopup")?.Visible == true;
 
         // territory-based hover
         Vector2 mouseWorld = GetGlobalMousePosition();
