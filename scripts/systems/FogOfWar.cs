@@ -58,7 +58,7 @@ public static class FogOfWar
         int ch = mapH / cellSize;
         var img = Image.CreateEmpty(cw, ch, false, Image.Format.Rgba8);
         Color visible = new Color(0, 0, 0, 0);
-        Color hidden = new Color(0, 0, 0, 0.85f);
+        Color hidden = new Color(0, 0, 0, 1f);
 
         var visibleCells = new HashSet<(int, int)>();
 

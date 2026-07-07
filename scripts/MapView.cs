@@ -30,9 +30,9 @@ public partial class MapView : Node2D
 
     public override void _Ready()
     {
+        GD.Print("[MapView] _Ready start");
+        var t0 = Time.GetTicksMsec();
         ModConsole.Init(this);
-
-        _seed = (int)(GD.Randi() % 100000);
 
         _terrain = new Sprite2D();
         _terrain.Name = "Terrain";
@@ -103,14 +103,24 @@ public partial class MapView : Node2D
         _seed = (int)(GD.Randi() % 100000);
         GD.Print($"Generating map {MapWidth}x{MapHeight}");
 
+        var t0 = Time.GetTicksMsec();
         ImageTexture tex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
         _terrain.Texture = tex;
         _terrain.Centered = false;
         _terrain.Scale = new Vector2(MapWidth, MapHeight);
+        GD.Print($"  terrain: {Time.GetTicksMsec() - t0}ms");
 
+        t0 = Time.GetTicksMsec();
         _locations = MapLocations.Generate(MapWidth, MapHeight, _seed);
+        GD.Print($"  locations: {Time.GetTicksMsec() - t0}ms ({_locations.Count} locs)");
+
+        t0 = Time.GetTicksMsec();
         PlaceMarkers();
+        GD.Print($"  markers: {Time.GetTicksMsec() - t0}ms");
+
+        t0 = Time.GetTicksMsec();
         ApplyTerritory();
+        GD.Print($"  territory: {Time.GetTicksMsec() - t0}ms");
 
         _camera.WorldW = MapWidth;
         _camera.WorldH = MapHeight;
@@ -132,6 +142,8 @@ public partial class MapView : Node2D
             }
         }
         _camera.Zoom = new Vector2(3.0f, 3.0f);
+
+        GD.Print($"[MapView] _Ready done in {Time.GetTicksMsec() - t0}ms");
     }
 
     private void InitGame()
@@ -173,14 +185,15 @@ public partial class MapView : Node2D
             GD.Print($"[MapView] 玩家宗门: {gm.State.Sects[playerIdx].Name}");
         }
 
-        // assign ownership for all locations
-        for (int i = 0; i < _locations.Count; i++)
+        // assign ownership for all locations (same order as _locations)
+        for (int i = 0; i < _locations.Count && i < gm.Locations.Count; i++)
         {
-            var loc = _locations[i];
-            if (loc.OwnerIndex >= 0 && loc.OwnerIndex < gm.State.Sects.Count)
+            int ownerIdx = _locations[i].OwnerIndex;
+            if (ownerIdx >= 0 && ownerIdx < gm.State.Sects.Count)
             {
-                var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name && l.Type == loc.Type);
-                if (ld != null) ld.OwnerSectId = gm.State.Sects[loc.OwnerIndex].Id;
+                gm.Locations[i].OwnerSectId = gm.State.Sects[ownerIdx].Id;
+                // also seed initial influence
+                gm.Locations[i].AddInfluence(gm.State.Sects[ownerIdx].Id, 50);
             }
         }
 

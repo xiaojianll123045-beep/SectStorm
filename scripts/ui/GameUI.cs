@@ -29,7 +29,7 @@ public partial class GameUI : CanvasLayer
         var bar = new ColorRect();
         bar.Color = new Color(0.08f, 0.08f, 0.10f, 0.85f);
         bar.SetAnchorsPreset(Control.LayoutPreset.TopWide);
-        bar.SetDeferred("size", new Vector2(0, 28));
+        bar.CustomMinimumSize = new Vector2(0, 28);
         AddChild(bar);
 
         var font = new Label();

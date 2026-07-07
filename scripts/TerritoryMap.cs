@@ -1,5 +1,6 @@
 using Godot;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public static class TerritoryMap
 {
@@ -16,6 +17,7 @@ public static class TerritoryMap
     };
 
     private static readonly Color Neutral = new Color(0.55f, 0.52f, 0.48f);
+    private static readonly Color CellBorder = new Color(0.92f, 0.90f, 0.87f);
     private static readonly Color RegimeBorder = new Color(0.06f, 0.04f, 0.03f);
 
     public struct CellInfo { public int Seed; public int Regime; }
@@ -24,7 +26,7 @@ public static class TerritoryMap
     {
         public ImageTexture Texture;
         public Vector2[] Centroids;
-        public int[] CellSeeds; // flat array cw*ch, seed index at each cell
+        public int[] CellSeeds;
         public int CellW;
         public int CellH;
     }
@@ -55,6 +57,7 @@ public static class TerritoryMap
             return Neutral;
         }
 
+        // spatial grid
         int gridSize = 256;
         int gw = (mapW + gridSize - 1) / gridSize;
         int gh = (mapH + gridSize - 1) / gridSize;
@@ -79,82 +82,92 @@ public static class TerritoryMap
             return d;
         }
 
-        int FindSeed(float wx, float wy)
-        {
-            int gx = (int)(wx / gridSize); if (gx < 0) gx = 0; if (gx >= gw) gx = gw - 1;
-            int gy = (int)(wy / gridSize); if (gy < 0) gy = 0; if (gy >= gh) gy = gh - 1;
-            int best = -1;
-            float bestD = float.MaxValue;
-            for (int dgy = -1; dgy <= 1; dgy++)
-                for (int dgx = -1; dgx <= 1; dgx++)
-                {
-                    int ngx = gx + dgx, ngy = gy + dgy;
-                    if (ngx < 0 || ngx >= gw || ngy < 0 || ngy >= gh) continue;
-                    var bucket = grid[ngy * gw + ngx];
-                    if (bucket == null) continue;
-                    foreach (int idx in bucket)
-                    {
-                        float dx = WrapDelta(allLocations[idx].Position.X, wx, mapW);
-                        float dy = WrapDelta(allLocations[idx].Position.Y, wy, mapH);
-                        float d = dx * dx + dy * dy;
-                        if (d < bestD) { bestD = d; best = idx; }
-                    }
-                }
-            return best;
-        }
-
+        // inline FindSeed for performance
         var img = Image.CreateEmpty(cw, ch, false, Image.Format.Rgba8);
         var cells = new CellInfo[cw * ch];
         var cellSeeds = new int[cw * ch];
-        var sumX = new double[allLocations.Count];
-        var sumY = new double[allLocations.Count];
         var count = new int[allLocations.Count];
 
-        for (int cy = 0; cy < ch; cy++)
+        // ---- PARALLEL FILL ----
+        Parallel.For(0, ch, cy =>
+        {
             for (int cx = 0; cx < cw; cx++)
             {
                 float wx = cx * c2w + c2w / 2f;
                 float wy = cy * c2w + c2w / 2f;
-                int seed = FindSeed(wx, wy);
-                if (seed < 0) { img.SetPixel(cx, cy, Neutral); cellSeeds[cy * cw + cx] = -1; continue; }
-                int regime = allLocations[seed].OwnerIndex;
-                cells[cy * cw + cx] = new CellInfo { Seed = seed, Regime = regime };
-                cellSeeds[cy * cw + cx] = seed;
-                img.SetPixel(cx, cy, GetColor(regime));
-                sumX[seed] += wx;
-                sumY[seed] += wy;
-                count[seed]++;
-            }
 
+                int gx = (int)(wx / gridSize); if (gx < 0) gx = 0; if (gx >= gw) gx = gw - 1;
+                int gy = (int)(wy / gridSize); if (gy < 0) gy = 0; if (gy >= gh) gy = gh - 1;
+
+                int nearest = -1;
+                float bestD = float.MaxValue;
+                for (int dgy = -1; dgy <= 1; dgy++)
+                    for (int dgx = -1; dgx <= 1; dgx++)
+                    {
+                        int ngx = gx + dgx, ngy = gy + dgy;
+                        if (ngx < 0 || ngx >= gw || ngy < 0 || ngy >= gh) continue;
+                        var bucket = grid[ngy * gw + ngx];
+                        if (bucket == null) continue;
+                        foreach (int idx in bucket)
+                        {
+                            float dx = WrapDelta(allLocations[idx].Position.X, wx, mapW);
+                            float dy = WrapDelta(allLocations[idx].Position.Y, wy, mapH);
+                            float d = dx * dx + dy * dy;
+                            if (d < bestD) { bestD = d; nearest = idx; }
+                        }
+                    }
+
+                if (nearest < 0) { img.SetPixel(cx, cy, Neutral); continue; }
+
+                int regime = allLocations[nearest].OwnerIndex;
+                int idx2 = cy * cw + cx;
+                cells[idx2] = new CellInfo { Seed = nearest, Regime = regime };
+                cellSeeds[idx2] = nearest;
+                img.SetPixel(cx, cy, GetColor(regime));
+            }
+        });
+
+        // centroids from cellSeeds (sequential, fast)
         var centroids = new Vector2[allLocations.Count];
+        var cxSum = new double[allLocations.Count];
+        var cySum = new double[allLocations.Count];
+        for (int i = 0; i < cellSeeds.Length; i++)
+        {
+            int s = cellSeeds[i];
+            if (s >= 0) { count[s]++; cxSum[s] += (i % cw) * c2w + c2w / 2f; cySum[s] += (i / cw) * c2w + c2w / 2f; }
+        }
         for (int i = 0; i < allLocations.Count; i++)
         {
-            if (count[i] > 0)
-                centroids[i] = new Vector2((float)(sumX[i] / count[i]), (float)(sumY[i] / count[i]));
-            else
-                centroids[i] = allLocations[i].Position;
+            centroids[i] = count[i] > 0
+                ? new Vector2((float)(cxSum[i] / count[i]), (float)(cySum[i] / count[i]))
+                : allLocations[i].Position;
         }
 
-        for (int cy = 0; cy < ch; cy++)
+        // ---- PARALLEL BORDERS ----
+        Parallel.For(0, ch, cy =>
+        {
             for (int cx = 0; cx < cw; cx++)
             {
-                int idx = cy * cw + cx;
-                var ci = cells[idx];
-                bool diffRegime = false;
+                int idx2 = cy * cw + cx;
+                var ci = cells[idx2];
+                bool diffSeed = false, diffRegime = false;
 
                 void Check(int nx, int ny)
                 {
                     if (nx < 0 || nx >= cw || ny < 0 || ny >= ch)
                     { diffRegime = true; return; }
-                    if (cells[ny * cw + nx].Regime != ci.Regime)
-                        diffRegime = true;
+                    var o = cells[ny * cw + nx];
+                    if (o.Seed != ci.Seed) diffSeed = true;
+                    if (o.Regime != ci.Regime) diffRegime = true;
                 }
 
                 Check(cx - 1, cy); Check(cx + 1, cy);
                 Check(cx, cy - 1); Check(cx, cy + 1);
 
                 if (diffRegime) img.SetPixel(cx, cy, RegimeBorder);
+                else if (diffSeed) img.SetPixel(cx, cy, CellBorder);
             }
+        });
 
         return new Result
         {

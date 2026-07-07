@@ -29,7 +29,7 @@ public static class MapLocations
         // --- Sects (山地) ---
         var sectPositions = new List<Vector2>();
         int sectTarget = (int)(15 * s * s);
-        for (int i = 0; i < sectTarget * 30; i++)
+        for (int i = 0; i < sectTarget * 5; i++)
         {
             int x = rng.Next(edgePad, mapW - edgePad);
             int y = rng.Next(edgePad, mapH - edgePad);
@@ -44,7 +44,7 @@ public static class MapLocations
         // --- Cities (平原) ---
         var cityPositions = new List<Vector2>();
         int cityTarget = (int)(25 * s * s);
-        for (int i = 0; i < cityTarget * 30; i++)
+        for (int i = 0; i < cityTarget * 5; i++)
         {
             int x = rng.Next(edgePad, mapW - edgePad);
             int y = rng.Next(edgePad, mapH - edgePad);
@@ -59,7 +59,7 @@ public static class MapLocations
         // --- Villages (密集) ---
         var villagePositions = new List<Vector2>();
         int villageTarget = (int)(120 * s * s);
-        for (int i = 0; i < villageTarget * 30; i++)
+        for (int i = 0; i < villageTarget * 3; i++)
         {
             int x = rng.Next(edgePad, mapW - edgePad);
             int y = rng.Next(edgePad, mapH - edgePad);
