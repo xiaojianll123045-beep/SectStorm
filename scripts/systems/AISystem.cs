@@ -60,7 +60,15 @@ public class AISystem
             targets.Add((e, score));
         }
 
-        var best = targets.Where(t => t.score > 1.3f && InWar(t.sect.Id) == false).OrderByDescending(t => t.score).FirstOrDefault();
+        // only consider targets with a passable path
+        var reachable = new List<(SectData sect, float score)>();
+        foreach (var t in targets)
+        {
+            if (HasPathTo(sect, t.sect))
+                reachable.Add(t);
+        }
+
+        var best = reachable.Where(t => t.score > 1.3f).OrderByDescending(t => t.score).FirstOrDefault();
         if (best.sect != null)
         {
             bool aggr = sect.Personality == AIPersonality.Aggressive || _rng.Next(3) == 0;
@@ -276,6 +284,15 @@ public class AISystem
     private bool HasArmy(int sId) => _gm.Armies.Any(a => a.SectId == sId && a.IsAlive);
     private ArmyData GetArmy(int sId) => _gm.Armies.FirstOrDefault(a => a.SectId == sId && a.IsAlive);
     private bool HasOrder(int sId, ArmyOrder o) => _gm.Armies.Any(a => a.SectId == sId && a.Order == o);
+
+    private bool HasPathTo(SectData from, SectData to)
+    {
+        var fromHome = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == from.Id);
+        var toHome = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == to.Id);
+        if (fromHome == null || toHome == null) return false;
+        var path = PathFinder.FindPath(fromHome.Position, toHome.Position, from.Id, _gm.State, _gm.Locations);
+        return path != null;
+    }
 
     private void CreateAIResponseArmy(SectData sect)
     {
