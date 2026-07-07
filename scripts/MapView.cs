@@ -71,6 +71,15 @@ public partial class MapView : Node2D
         gameUI.Name = "GameUI";
         canvas.AddChild(gameUI);
 
+        var pauseMenu = new PauseMenu();
+        pauseMenu.Name = "PauseMenu";
+        pauseMenu.OpenSectPanel += () => GetNodeOrNull<SectPanel>("SectPanel")?.Toggle();
+        AddChild(pauseMenu);
+
+        var sectPanel = new SectPanel();
+        sectPanel.Name = "SectPanel";
+        AddChild(sectPanel);
+
         _info = new Label();
         _info.Name = "Info";
         _info.Position = new Vector2(10, 10);
@@ -360,7 +369,14 @@ public partial class MapView : Node2D
     {
         if (@event is InputEventKey k && k.Pressed)
         {
-            if (k.Keycode == Key.Escape) GetNodeOrNull<GameUI>("../UI/GameUI")?.HideInfo();
+            if (k.Keycode == Key.Escape)
+            {
+                var pause = GetNodeOrNull<PauseMenu>("PauseMenu");
+                if (pause != null && pause.Visible) { pause.Toggle(); return; }
+                var sectP = GetNodeOrNull<SectPanel>("SectPanel");
+                if (sectP != null && sectP.Visible) { sectP.Toggle(); return; }
+                GetNodeOrNull<PauseMenu>("PauseMenu")?.Toggle();
+            }
             if (k.Keycode == Key.F)
             {
                 var fog = GetNodeOrNull<FogRenderer>("FogOfWar");
