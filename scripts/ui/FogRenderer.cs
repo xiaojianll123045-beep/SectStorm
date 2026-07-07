@@ -14,8 +14,6 @@ public partial class FogRenderer : Sprite2D
         Centered = false;
         TextureFilter = TextureFilterEnum.Linear;
         ZIndex = 80;
-        if (_gm != null)
-            Callable.From(() => Refresh()).CallDeferred();
     }
 
     public override void _Process(double delta)
@@ -23,14 +21,14 @@ public partial class FogRenderer : Sprite2D
         if (_gm == null || _gm.State == null) return;
         int turn = _gm.State.TotalTurns;
         if (_lastUpdateTurn == turn) return;
-        if (turn % 3 != 0) return;
+        if (turn % 9 != 0) return;
+        _lastUpdateTurn = turn;
         Refresh();
     }
 
     private void Refresh()
     {
         if (_gm == null || _gm.State == null) return;
-        _lastUpdateTurn = _gm.State.TotalTurns;
         int cellSize = 32;
         var fogImg = FogOfWar.GenerateFogImage(_mapW, _mapH, cellSize,
             _gm.State.PlayerSectId, _gm.State, _gm.Locations, _gm.Armies);

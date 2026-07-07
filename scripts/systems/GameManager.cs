@@ -42,8 +42,16 @@ public partial class GameManager : Node
     public void StartGameLoop()
     {
         _turnTimer = new Timer();
-        _turnTimer.WaitTime = 0.5f;
-        _turnTimer.Timeout += ProcessTurn;
+        _turnTimer.OneShot = true;
+        _turnTimer.WaitTime = 0.3f;
+        _turnTimer.Timeout += () => {
+            var t0 = Time.GetTicksMsec();
+            try { ProcessTurn(); }
+            catch (System.Exception e) { GD.PrintErr($"[GameManager] Turn error: {e.Message}"); }
+            int elapsed = (int)(Time.GetTicksMsec() - t0);
+            if (elapsed > 200) GD.Print($"[GameManager] Turn took {elapsed}ms (WARNING)");
+            _turnTimer.Start(0.3f); // restart after processing
+        };
         AddChild(_turnTimer);
         _turnTimer.Start();
         State.Log("游戏开始");
@@ -104,31 +112,33 @@ public partial class GameManager : Node
             }
         }
 
-        // disciples: idle cultivation or army attrition
-        foreach (var d in State.Disciples)
+        // disciples: idle cultivation (limit per turn for perf)
+        int cultCount = 0;
+        for (int i = State.Disciples.Count - 1; i >= 0 && cultCount < 200; i--)
         {
+            var d = State.Disciples[i];
             if (d.SectId < 0) continue;
-            // check if in an army
-            bool inArmy = Armies.Any(a => a.DiscipleIds.Contains(d.Id));
-            if (!inArmy && d.State == "idle")
+            bool inArmy = false;
+            foreach (var a in Armies) if (a.DiscipleIds.Contains(d.Id)) { inArmy = true; break; }
+            if (inArmy || d.State != "idle") continue;
+
+            cultCount++;
+            var sect = State.GetSect(d.SectId);
+            if (sect != null)
             {
-                var sect = State.GetSect(d.SectId);
-                if (sect != null)
+                d.CultivationProgress += (int)(5 * sect.BreakthroughBonus());
+                if (d.CultivationProgress >= 100)
                 {
-                    d.CultivationProgress += (int)(5 * sect.BreakthroughBonus());
-                    if (d.CultivationProgress >= 100)
-                    {
-                        d.CultivationProgress = 0;
-                        if (TryBreakthrough(d, sect))
-                            State.Log($"{d.Name} 突破！");
-                    }
+                    d.CultivationProgress = 0;
+                    if (TryBreakthrough(d, sect))
+                        State.Log($"{d.Name} 突破！");
                 }
-                d.Lifespan--;
-                if (d.Lifespan <= 0)
-                {
-                    State.Disciples.Remove(d);
-                    State.Log($"{d.Name} 陨落");
-                }
+            }
+            d.Lifespan--;
+            if (d.Lifespan <= 0)
+            {
+                State.Disciples.RemoveAt(i);
+                State.Log($"{d.Name} 陨落");
             }
         }
 

@@ -92,7 +92,25 @@ public partial class MapView : Node2D
         _tooltip.Modulate = new Color(1, 1, 1, 0.95f);
         canvas.AddChild(_tooltip);
 
-        Generate();
+        // defer all heavy work to next frame so engine stays responsive
+        Callable.From(() => {
+            Generate();
+            InitGame();
+            _camera.WorldW = MapWidth;
+            _camera.WorldH = MapHeight;
+            var gm2 = GetNodeOrNull<GameManager>("GameManager");
+            if (gm2 != null)
+            {
+                var ps = gm2.State.PlayerSect;
+                if (ps != null)
+                {
+                    var sl = gm2.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == ps.Id);
+                    if (sl != null) _camera.Position = sl.Position;
+                }
+            }
+            _camera.Zoom = new Vector2(3.0f, 3.0f);
+            GD.Print($"[MapView] _Ready done in {Time.GetTicksMsec() - t0}ms");
+        }).CallDeferred();
     }
 
     private void Generate()
