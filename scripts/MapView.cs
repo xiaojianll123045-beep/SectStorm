@@ -74,11 +74,21 @@ public partial class MapView : Node2D
         var pauseMenu = new PauseMenu();
         pauseMenu.Name = "PauseMenu";
         pauseMenu.OpenSectPanel += () => GetNodeOrNull<SectPanel>("SectPanel")?.Toggle();
+        pauseMenu.OpenDiplomacy += () => GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel")?.Toggle();
+        pauseMenu.OpenArmyCreator += () => GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Show();
         AddChild(pauseMenu);
 
         var sectPanel = new SectPanel();
         sectPanel.Name = "SectPanel";
         AddChild(sectPanel);
+
+        var diploPanel = new DiplomacyPanel();
+        diploPanel.Name = "DiplomacyPanel";
+        AddChild(diploPanel);
+
+        var armyCreator = new ArmyCreator();
+        armyCreator.Name = "ArmyCreator";
+        AddChild(armyCreator);
 
         _info = new Label();
         _info.Name = "Info";
@@ -371,10 +381,10 @@ public partial class MapView : Node2D
         {
             if (k.Keycode == Key.Escape)
             {
-                var pause = GetNodeOrNull<PauseMenu>("PauseMenu");
-                if (pause != null && pause.Visible) { pause.Toggle(); return; }
-                var sectP = GetNodeOrNull<SectPanel>("SectPanel");
-                if (sectP != null && sectP.Visible) { sectP.Toggle(); return; }
+                if (GetNodeOrNull<PauseMenu>("PauseMenu")?.Visible == true) { GetNodeOrNull<PauseMenu>("PauseMenu")?.Toggle(); return; }
+                if (GetNodeOrNull<SectPanel>("SectPanel")?.Visible == true) { GetNodeOrNull<SectPanel>("SectPanel")?.Toggle(); return; }
+                if (GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel")?.Visible == true) { GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel")?.Toggle(); return; }
+                if (GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Visible == true) { GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Hide(); return; }
                 GetNodeOrNull<PauseMenu>("PauseMenu")?.Toggle();
             }
             if (k.Keycode == Key.F)
@@ -383,6 +393,8 @@ public partial class MapView : Node2D
                 if (fog != null) fog.FogEnabled = !fog.FogEnabled;
                 GD.Print($"Fog: {(fog?.FogEnabled == true ? "ON" : "OFF")}");
             }
+            if (k.Keycode == Key.D) { var dp = GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel"); if (dp != null && !dp.Visible) dp.Toggle(); }
+            if (k.Keycode == Key.A) GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Show();
             if (k.Keycode == Key.L) GetNodeOrNull<GameUI>("../UI/GameUI")?.ToggleLog();
         }
         if (@event is InputEventMouseButton mb && mb.Pressed)
