@@ -6,6 +6,9 @@ public partial class GameManager : Node
 {
     public static GameManager Instance;
     public GameState State;
+    public bool AiProcessing;
+    public int AiProgress;
+    public int AiTotal;
     public List<LocationData> Locations = new();
     public List<ArmyData> Armies = new();
     public List<WarData> Wars = new();
@@ -178,9 +181,14 @@ public partial class GameManager : Node
         if (State.TotalTurns % 9 == 0)
         {
             GD.Print($"  AI start...");
+            AiProcessing = true;
+            AiTotal = _ai.BatchCount();
+            AiProgress = 0;
             var t0 = Time.GetTicksMsec();
             _ai.ProcessAllAi();
+            AiProgress = AiTotal;
             GD.Print($"  AI done ({Time.GetTicksMsec() - t0}ms)");
+            AiProcessing = false;
         }
         GD.Print($"=== Turn {State.TotalTurns} done ===");
     }

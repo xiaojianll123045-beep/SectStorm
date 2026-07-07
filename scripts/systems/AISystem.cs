@@ -12,6 +12,8 @@ public class AISystem
     private int _aiCount;
     private int _aiSlowCount;
 
+    public int BatchCount() => _gm.State.AiSects.Count();
+
     public void ProcessAllAi()
     {
         _aiCount = 0;
@@ -35,6 +37,7 @@ public class AISystem
             int dt = (int)(Time.GetTicksMsec() - t0);
             if (dt > 50) GD.Print($"  [AI] {sect.Name} took {dt}ms");
             done++;
+            _gm.AiProgress = done;
             if (done % 100 == 0) GD.Print($"  [AI] {done}/{total} sects processed");
         }
         GD.Print($"  [AI] done {done}/{total} sects");

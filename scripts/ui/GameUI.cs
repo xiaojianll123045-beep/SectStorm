@@ -12,7 +12,8 @@ public partial class GameUI : CanvasLayer
     private Label _prestigeLabel;
     private Label _discipleCountLabel;
     private Label _dateLabel;
-    private Label _selectedLabel;
+    private Label _statusLabel;
+    private float _statusTimer;
 
     public override void _Ready()
     {
@@ -49,6 +50,12 @@ public partial class GameUI : CanvasLayer
 
         _dateLabel = new Label();
         _dateLabel.Position = new Vector2(600, 4);
+
+        _statusLabel = new Label();
+        _statusLabel.Position = new Vector2(800, 4);
+        _statusLabel.Visible = false;
+        _statusLabel.AddThemeColorOverride("font_color", new Color(1f, 0.8f, 0.2f));
+        AddChild(_statusLabel);
         AddChild(_dateLabel);
     }
 
@@ -72,6 +79,17 @@ public partial class GameUI : CanvasLayer
     {
         if (_gm == null || _gm.State == null) return;
         UpdateTopBar();
+        if (_gm.AiProcessing)
+        {
+            _statusTimer = 5f;
+            _statusLabel.Text = $"AI处理中... ({_gm.AiProgress}/{_gm.AiTotal})";
+            _statusLabel.Visible = true;
+        }
+        else if (_statusTimer > 0)
+        {
+            _statusTimer -= (float)delta;
+            if (_statusTimer <= 0) _statusLabel.Visible = false;
+        }
     }
 
     private void UpdateTopBar()
