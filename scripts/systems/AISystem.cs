@@ -9,8 +9,11 @@ public class AISystem
 
     public AISystem(GameManager gm) => _gm = gm;
 
+    private int _warsThisTick;
+
     public void ProcessAllAi()
     {
+        _warsThisTick = 0;
         foreach (var sect in _gm.State.AiSects.ToList())
         {
             if (!sect.IsAlive) continue;
@@ -23,7 +26,7 @@ public class AISystem
 
             if (myWar != null)
                 ProcessWarAI(sect, myWar);
-            else
+            else if (_warsThisTick < 3) // max 3 new wars per AI tick
                 ProcessPeaceAI(sect);
         }
     }
@@ -57,7 +60,7 @@ public class AISystem
             if (aggressive || balanced)
             {
                 _gm.DeclareWar(sect.Id, best.sect.Id);
-                // create a small army
+                _warsThisTick++;
                 CreateAIResponseArmy(sect);
             }
         }

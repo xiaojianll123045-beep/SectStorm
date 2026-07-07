@@ -39,11 +39,24 @@ public partial class GameManager : Node
                 State.Relations.Add(new RelationData(State.Sects[i].Id, State.Sects[j].Id));
     }
 
+    private bool _turnRunning;
+
     public void StartGameLoop()
     {
         _turnTimer = new Timer();
-        _turnTimer.WaitTime = 0.5f;
-        _turnTimer.Timeout += ProcessTurn;
+        _turnTimer.OneShot = true;
+        _turnTimer.WaitTime = 0.3f;
+        _turnTimer.Timeout += () => {
+            if (_turnRunning) return;
+            _turnRunning = true;
+            var t0 = Time.GetTicksMsec();
+            try { ProcessTurn(); }
+            catch (System.Exception e) { GD.PrintErr($"[Game] Turn error: {e.Message}"); }
+            int dt = (int)(Time.GetTicksMsec() - t0);
+            if (dt > 300) GD.Print($"[Game] Long turn: {dt}ms");
+            _turnRunning = false;
+            _turnTimer.Start();
+        };
         AddChild(_turnTimer);
         _turnTimer.Start();
         State.Log("游戏开始");
