@@ -15,7 +15,6 @@ public partial class GameManager : Node
 
     private Timer _turnTimer;
     private AISystem _ai;
-
     public override void _Ready()
     {
         Instance = this;
@@ -177,17 +176,24 @@ public partial class GameManager : Node
             if (war.Ended) Wars.Remove(war);
         }
 
-        // AI
+        // AI (main thread, with progress)
         if (State.TotalTurns % 9 == 0)
         {
             GD.Print($"  AI start...");
             AiProcessing = true;
             AiTotal = _ai.BatchCount();
             AiProgress = 0;
-            var t0 = Time.GetTicksMsec();
-            _ai.ProcessAllAi();
+            try
+            {
+                var t0 = Time.GetTicksMsec();
+                _ai.ProcessAllAi();
+                GD.Print($"  AI done ({Time.GetTicksMsec() - t0}ms)");
+            }
+            catch (System.Exception e)
+            {
+                GD.PrintErr($"[Game] AI error: {e.Message}\n{e.StackTrace}");
+            }
             AiProgress = AiTotal;
-            GD.Print($"  AI done ({Time.GetTicksMsec() - t0}ms)");
             AiProcessing = false;
         }
         GD.Print($"=== Turn {State.TotalTurns} done ===");
