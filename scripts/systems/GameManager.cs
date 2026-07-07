@@ -52,7 +52,7 @@ public partial class GameManager : Node
     {
         _turnTimer = new Timer();
         _turnTimer.OneShot = true;
-        _turnTimer.WaitTime = 2.0f;
+        _turnTimer.WaitTime = 0.001f; // debug: no wait between turns
         _turnTimer.Timeout += () => {
             if (_turnRunning) {
                 GD.Print("[Game] TURN SKIPPED (still running)");

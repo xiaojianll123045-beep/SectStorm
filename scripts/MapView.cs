@@ -216,6 +216,18 @@ public partial class MapView : Node2D
             }
         }
 
+        // give each sect initial disciples
+        foreach (var sect in gm.State.Sects)
+        {
+            var home = gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == sect.Id);
+            if (home == null) home = gm.Locations.FirstOrDefault(l => l.OwnerSectId == sect.Id);
+            for (int di = 0; di < 4; di++)
+            {
+                gm.CreateDisciple($"{sect.Name}弟子{di + 1}", sect.Id, home);
+            }
+            sect.Lingshi = 200;
+        }
+
         gm.InitSects(playerIdx);
         gm.StartGameLoop();
 
@@ -344,15 +356,124 @@ public partial class MapView : Node2D
         }
     }
 
+    private RichTextLabel _debugPanel;
+
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
+        if (@event is InputEventKey key && key.Pressed && key.Keycode == Key.Escape)
+        {
+            if (_debugPanel != null) _debugPanel.Visible = false;
+        }
+        if (@event is InputEventKey key2 && key2.Pressed && key2.Keycode == Key.F)
+        {
+            var fog = GetNodeOrNull<FogRenderer>("FogOfWar");
+            if (fog != null) fog.FogEnabled = !fog.FogEnabled;
+            GD.Print($"Fog: {(fog?.FogEnabled == true ? "ON" : "OFF")}");
+        }
+        if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Right)
+        {
+            Vector2 mouseWorld = GetGlobalMousePosition();
+            int seedIdx = SeedAtWorldPos(mouseWorld);
+            var gm = GetNodeOrNull<GameManager>("GameManager");
+            if (seedIdx >= 0 && seedIdx < _locations.Count)
+            {
+                var loc = _locations[seedIdx];
+                string info = $"[b]{loc.Name}[/b] ({loc.Type})\n";
+                info += $"位置: ({loc.Position.X:F0}, {loc.Position.Y:F0})\n";
+                if (gm != null)
+                {
+                    var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name);
+                    if (ld != null)
+                    {
+                        info += $"--- LocationData ---\n";
+                        info += $"OwnerSectId: {ld.OwnerSectId}\n";
+                        info += $"Prosperity: {ld.Prosperity:F1}\n";
+                        info += $"Loyalty: {ld.Loyalty:F1}\n";
+                        info += $"Status: {ld.Status}\n";
+                        info += $"Population: {ld.Population}\n";
+                        info += $"TaxBase: {ld.TaxBase}\n";
+
+                        var sect = gm.State.GetSect(ld.OwnerSectId);
+                        if (sect != null)
+                        {
+                            info += $"\n--- 归属宗门: {sect.Name} ---\n";
+                            info += $"Id: {sect.Id}\n";
+                            info += $"灵石: {(int)sect.Lingshi}\n";
+                            info += $"声望: {(int)sect.Prestige}\n";
+                            info += $"灵脉: {(int)sect.SpiritVein}\n";
+                            info += $"建筑: 议{sect.MeetingHall}修{sect.CultivationRoom}藏{sect.Library}丹{sect.AlchemyRoom}田{sect.SpiritField}阵{sect.ProtectionArray}\n";
+                            info += $"弟子: {gm.State.Disciples.Count(d => d.SectId == sect.Id)}\n";
+                            info += $"城市: {sect.ControlledCityIds.Count}\n";
+                            info += $"IsPlayer: {sect.IsPlayer}\n";
+                            info += $"Personality: {sect.Personality}\n";
+                            info += $"Goal: {sect.CurrentGoal}\n";
+                        }
+
+                        var armies = gm.Armies.Where(a => a.SectId == ld.OwnerSectId).ToList();
+                        if (armies.Count > 0)
+                        {
+                            info += $"\n--- 部队 ({armies.Count}) ---\n";
+                            foreach (var a in armies)
+                            {
+                                info += $"  #{a.Id} ({a.Count}人) 战力={a.EffectiveCombat} 状态={a.Order}\n";
+                            }
+                        }
+
+                        var wars = gm.Wars.Where(w => w.AttackerSectId == ld.OwnerSectId || w.DefenderSectId == ld.OwnerSectId).ToList();
+                        if (wars.Count > 0)
+                        {
+                            info += $"\n--- 战争 ---\n";
+                            foreach (var w in wars)
+                            {
+                                var atk = gm.State.GetSect(w.AttackerSectId);
+                                var def = gm.State.GetSect(w.DefenderSectId);
+                                info += $"  {atk?.Name} vs {def?.Name} 分数={w.WarScore}\n";
+                            }
+                        }
+                    }
+                }
+                ShowDebugPanel(info);
+            }
+            else
+            {
+                // clicked on empty terrain
+                if (gm != null)
+                {
+                    string info = "--- 全局 ---\n";
+                    info += $"Time: 第{gm.State.Year}年 {gm.State.Month}月 ({gm.State.Xun}/36)\n";
+                    info += $"Sects: {gm.State.Sects.Count(s => s.IsAlive)} alive\n";
+                    info += $"Wars: {gm.Wars.Count}\n";
+                    info += $"Armies: {gm.Armies.Count}\n";
+                    info += $"Disciples: {gm.State.Disciples.Count}\n";
+                    info += $"Turns: {gm.State.TotalTurns}\n";
+                    ShowDebugPanel(info);
+                }
+            }
+        }
+        if (@event is InputEventMouseButton mb2 && mb2.Pressed && mb2.ButtonIndex == MouseButton.Left)
         {
             Vector2 mouseWorld = GetGlobalMousePosition();
             int seedIdx = SeedAtWorldPos(mouseWorld);
             if (seedIdx >= 0 && seedIdx < _locations.Count)
                 OnLocationClicked(_locations[seedIdx]);
         }
+    }
+
+    private void ShowDebugPanel(string text)
+    {
+        if (_debugPanel == null)
+        {
+            _debugPanel = new RichTextLabel();
+            _debugPanel.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+            _debugPanel.Size = new Vector2(400, 600);
+            _debugPanel.BbcodeEnabled = true;
+            _debugPanel.AddThemeFontSizeOverride("normal_font_size", 12);
+            _debugPanel.AddThemeColorOverride("default_color", new Color(0.9f, 0.9f, 1.0f));
+            _debugPanel.AddThemeColorOverride("background_color", new Color(0.05f, 0.05f, 0.08f, 0.92f));
+            ((CanvasLayer)GetNode("UI")).AddChild(_debugPanel);
+        }
+        _debugPanel.Text = text;
+        _debugPanel.Visible = true;
     }
 
     private Vector2 LocationPos(int idx)
