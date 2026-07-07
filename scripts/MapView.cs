@@ -117,8 +117,10 @@ public partial class MapView : Node2D
 
         // defer all heavy work to next frame so engine stays responsive
         Callable.From(() => {
-            Generate();
-            InitGame();
+            try { Generate(); }
+            catch (System.Exception e) { GD.PrintErr($"[MapView] Generate: {e}\n{e.StackTrace}"); }
+            try { InitGame(); }
+            catch (System.Exception e) { GD.PrintErr($"[MapView] InitGame: {e}\n{e.StackTrace}"); }
             _camera.WorldW = MapWidth;
             _camera.WorldH = MapHeight;
             var gm2 = GetNodeOrNull<GameManager>("GameManager");
