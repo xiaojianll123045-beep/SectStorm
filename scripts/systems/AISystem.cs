@@ -169,8 +169,8 @@ public class AISystem
 
     private void CreateAIResponseArmy(SectData sect)
     {
-        var disciples = _gm.State.Disciples.Where(d => d.SectId == sect.Id && d.State == "idle").Take(5).ToList();
-        if (disciples.Count == 0) return;
+        var disciples = _gm.State.Disciples.Where(d => d.SectId == sect.Id && d.State == "idle").Take(10).ToList();
+        if (disciples.Count < 3) return;
         var home = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == sect.Id);
         if (home == null) return;
         _gm.CreateArmy(sect.Id, disciples.Select(d => d.Id).ToList(), home.Position);

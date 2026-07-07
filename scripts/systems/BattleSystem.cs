@@ -54,7 +54,8 @@ public static class BattleSystem
         {
             if (a.DiscipleIds.Count == 0) continue;
             float rate = minRate + (float)_rng.NextDouble() * (maxRate - minRate);
-            int count = Mathf.Max(1, (int)(a.DiscipleIds.Count * rate));
+            int count = Mathf.Max(0, (int)(a.DiscipleIds.Count * rate));
+        if (count > a.DiscipleIds.Count) count = a.DiscipleIds.Count;
             for (int i = 0; i < count && a.DiscipleIds.Count > 0; i++)
             {
                 a.DiscipleIds.RemoveAt(a.DiscipleIds.Count - 1);

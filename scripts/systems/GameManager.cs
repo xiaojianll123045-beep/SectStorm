@@ -93,39 +93,39 @@ public partial class GameManager : Node
             }
         }
 
-        // process army movement
+        // process army movement with territory speed modifier
         foreach (var army in Armies)
         {
             if (!army.IsAlive) continue;
+
+            // territory speed
+            int owner = OwnerAtPosition(army.Position);
+            float mul = 1f;
+            if (owner == army.SectId) mul = 1f;
+            else if (owner < 0) mul = 0.6f;
+            else
+            {
+                var rel = State.GetRelation(army.SectId, owner);
+                if (rel == null) mul = 0.5f;
+                else if (rel.State == RelationState.Ally) mul = 0.8f;
+                else if (rel.State == RelationState.War) mul = 0.3f;
+                else mul = 0.5f;
+            }
+            float speed = 100f * mul;
+
             if (army.Order == ArmyOrder.Moving)
             {
-                army.TurnsUntilArrival--;
-                if (army.TurnsUntilArrival <= 0)
-                {
-                    army.Position = army.MoveTarget;
-                    army.Order = ArmyOrder.Idle;
-                }
+                float dist = (army.MoveTarget - army.Position).Length();
+                if (dist <= speed) { army.Position = army.MoveTarget; army.Order = ArmyOrder.Idle; }
+                else army.Position += (army.MoveTarget - army.Position).Normalized() * speed;
             }
-            else if (army.Order == ArmyOrder.Attacking)
+            else if (army.Order == ArmyOrder.Attacking && army.AttackTargetArmyId >= 0)
             {
-                // check if target army still exists
-                if (army.AttackTargetArmyId >= 0)
-                {
-                    var target = Armies.FirstOrDefault(a => a.Id == army.AttackTargetArmyId);
-                    if (target == null || !target.IsAlive)
-                    {
-                        army.Order = ArmyOrder.Idle;
-                        continue;
-                    }
-                    if ((army.Position - target.Position).Length() < 30f)
-                        ResolveArmyBattle(army, target);
-                    else
-                    {
-                        // move towards target
-                        Vector2 dir = (target.Position - army.Position).Normalized();
-                        army.Position += dir * 50f;
-                    }
-                }
+                var target = Armies.FirstOrDefault(a => a.Id == army.AttackTargetArmyId);
+                if (target == null || !target.IsAlive) { army.Order = ArmyOrder.Idle; continue; }
+                float dist = (target.Position - army.Position).Length();
+                if (dist <= speed) { army.Position = target.Position; ResolveArmyBattle(army, target); }
+                else army.Position += (target.Position - army.Position).Normalized() * speed;
             }
         }
 
@@ -196,6 +196,27 @@ public partial class GameManager : Node
             AiProgress = AiTotal;
             AiProcessing = false;
         }
+
+        // AI disciple recruitment (every 3 turns)
+        if (State.TotalTurns % 3 == 0)
+        {
+            foreach (var sect in State.Sects)
+            {
+                if (!sect.IsAlive) continue;
+                int current = State.Disciples.Count(d => d.SectId == sect.Id);
+                int max = sect.MaxDisciples();
+                if (current < max && sect.Lingshi > 50)
+                {
+                    var home = Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == sect.Id);
+                    if (home != null)
+                    {
+                        CreateDisciple($"{sect.Name}弟子{current + 1}", sect.Id, home);
+                        sect.Lingshi -= 30;
+                    }
+                }
+            }
+        }
+
         GD.Print($"=== Turn {State.TotalTurns} done ===");
     }
 
@@ -204,15 +225,23 @@ public partial class GameManager : Node
         var result = BattleSystem.Resolve(new List<ArmyData>{atk}, new List<ArmyData>{def}, 0, 0);
         State.Log($"战斗: {atk.Name} vs {def.Name}, 攻方胜={result.AttackerWon}, 攻方损失{result.AtKilled}, 守方损失{result.DefKilled}");
 
-        // update war score
         var war = Wars.FirstOrDefault(w =>
             (w.AttackerSectId == atk.SectId && w.DefenderSectId == def.SectId) ||
             (w.AttackerSectId == def.SectId && w.DefenderSectId == atk.SectId));
         if (war != null)
             war.ScoreFromBattles += result.AtKilled + result.DefKilled;
 
-        if (!atk.IsAlive) Armies.Remove(atk);
-        if (!def.IsAlive) Armies.Remove(def);
+        // attacker wins → defender routed (removed even if survivors)
+        if (result.AttackerWon)
+        {
+            Armies.Remove(def);
+            if (!atk.IsAlive) Armies.Remove(atk);
+        }
+        else
+        {
+            Armies.Remove(atk);
+            if (!def.IsAlive) Armies.Remove(def);
+        }
     }
 
     private bool TryBreakthrough(DiscipleData d, SectData sect)
@@ -232,6 +261,25 @@ public partial class GameManager : Node
         }
         d.Mood -= 10;
         return false;
+    }
+
+    public int OwnerAtPosition(Vector2 pos)
+    {
+        float bestDist = float.MaxValue;
+        int bestOwner = -1;
+        // check a subset of nearby locations for efficiency
+        int checkCount = Mathf.Min(100, Locations.Count);
+        for (int i = 0; i < checkCount; i++)
+        {
+            int idx = (int)((pos.X + pos.Y * 13) % Locations.Count + i) % Locations.Count;
+            var loc = Locations[idx];
+            if (loc.OwnerSectId < 0) continue;
+            float dx = pos.X - loc.Position.X;
+            float dy = pos.Y - loc.Position.Y;
+            float d = dx * dx + dy * dy;
+            if (d < bestDist) { bestDist = d; bestOwner = loc.OwnerSectId; }
+        }
+        return bestOwner;
     }
 
     public int CreateDisciple(string name, int sectId, LocationData source)
