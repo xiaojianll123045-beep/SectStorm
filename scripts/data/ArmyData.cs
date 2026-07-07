@@ -16,6 +16,7 @@ public class ArmyData
     public int AttackTargetArmyId = -1; // pursuing a specific army
     public int AttackTargetLocId = -1;  // attacking a location
     public int TurnsUntilArrival;
+    public List<Vector2> PathWaypoints;
     public int TurnsWithoutSupply;
 
     // cached stats

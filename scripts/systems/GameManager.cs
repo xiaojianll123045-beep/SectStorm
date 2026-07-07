@@ -111,9 +111,9 @@ public partial class GameManager : Node
                 targetPos = t.Position;
             }
 
-            // check if target is valid territory
+            // check if arrived at target
             float dist = (targetPos - army.Position).Length();
-            if (dist <= 5f)
+            if (dist <= 50f)
             {
                 if (army.Order == ArmyOrder.Moving)
                 {
@@ -142,27 +142,40 @@ public partial class GameManager : Node
                 continue;
             }
 
-            // calculate step
-            Vector2 step = (targetPos - army.Position).Normalized() * 100f;
-            if (step.Length() > dist) step = targetPos - army.Position;
-            Vector2 newPos = army.Position + step;
+            // compute path if needed
+            if (army.PathWaypoints == null || army.PathWaypoints.Count == 0)
+            {
+                army.PathWaypoints = PathFinder.FindPath(army.Position, targetPos, army.SectId, State, Locations);
+                if (army.PathWaypoints == null) { army.Order = ArmyOrder.Idle; continue; }
+            }
 
-        // territory speed modifier (no blocking, just slow down)
-        int terrainOwner = OwnerAtPosition(newPos);
-        float terrainMul = 1f;
-        if (terrainOwner == army.SectId) terrainMul = 1f;
-        else if (terrainOwner < 0) terrainMul = 0.8f;
-        else
-        {
-            var rel = State.GetRelation(army.SectId, terrainOwner);
-            if (rel == null) terrainMul = 0.6f;
-            else if (rel.State == RelationState.Ally) terrainMul = 0.9f;
-            else if (rel.State == RelationState.War) terrainMul = 0.7f;
-            else terrainMul = 0.5f;
-        }
-        step *= terrainMul;
+            // move toward next waypoint
+            Vector2 wp = army.PathWaypoints[0];
+            float wpDist = (wp - army.Position).Length();
+            if (wpDist <= 10f)
+            {
+                army.PathWaypoints.RemoveAt(0);
+                if (army.PathWaypoints.Count == 0) { army.Order = ArmyOrder.Idle; continue; }
+                wp = army.PathWaypoints[0];
+                wpDist = (wp - army.Position).Length();
+            }
 
-            army.Position = newPos;
+            Vector2 step = (wp - army.Position).Normalized() * 100f;
+            if (step.Length() > wpDist) step = wp - army.Position;
+
+            int terrainOwner = OwnerAtPosition(army.Position + step);
+            float mul = 1f;
+            if (terrainOwner == army.SectId) mul = 1f;
+            else if (terrainOwner < 0) mul = 0.8f;
+            else
+            {
+                var rel = State.GetRelation(army.SectId, terrainOwner);
+                if (rel == null) mul = 0.5f;
+                else if (rel.State == RelationState.War) mul = 0.7f;
+                else if (rel.State == RelationState.Ally) mul = 0.9f;
+                else mul = 0.5f;
+            }
+            army.Position += step * mul;
         }
 
         // disciples: idle cultivation or army attrition
