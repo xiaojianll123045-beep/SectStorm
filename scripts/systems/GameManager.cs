@@ -117,22 +117,23 @@ public partial class GameManager : Node
             {
                 if (army.Order == ArmyOrder.Moving)
                 {
-                    army.Order = ArmyOrder.Idle;
-                    // capture city/territory at target
-                    var targetLoc = Locations.FirstOrDefault(l => (l.Position - targetPos).Length() < 30f && l.Type != LocationType.Sect);
-                    if (targetLoc != null && targetLoc.OwnerSectId != army.SectId)
+                    // capture city on arrival
+                    var targetLoc = Locations.FirstOrDefault(l => (l.Position - targetPos).Length() < 30f);
+                    if (targetLoc != null && targetLoc.OwnerSectId != army.SectId && targetLoc.OwnerSectId >= 0)
                     {
-                        // reduce enemy influence
-                        if (targetLoc.OwnerSectId >= 0)
-                        {
-                            float current = targetLoc.GetInfluence(targetLoc.OwnerSectId);
-                            targetLoc.Influence[targetLoc.OwnerSectId] = Mathf.Max(0, current - 20f);
-                        }
-                        // increase attacker influence
-                        targetLoc.AddInfluence(army.SectId, 25f);
-                        if (targetLoc.OwnerSectId == army.SectId)
-                            State.Log($"{army.Name} 占领了 {targetLoc.Name}");
+                        int prevOwner = targetLoc.OwnerSectId;
+                        targetLoc.OwnerSectId = army.SectId;
+                        targetLoc.Influence.Clear();
+                        targetLoc.AddInfluence(army.SectId, 100);
+                        targetLoc.Prosperity = Mathf.Max(10, targetLoc.Prosperity - 10);
+                        // update ControlledCityIds
+                        var prevSect = State.GetSect(prevOwner);
+                        if (prevSect != null) prevSect.ControlledCityIds.Remove(targetLoc.Id);
+                        var newSect = State.GetSect(army.SectId);
+                        if (newSect != null) newSect.ControlledCityIds.Add(targetLoc.Id);
+                        State.Log($"{army.Name} 攻占了 {targetLoc.Name}");
                     }
+                    army.Order = ArmyOrder.Idle;
                 }
                 else if (army.Order == ArmyOrder.Attacking) ResolveArmyBattle(army, Armies.First(a => a.Id == army.AttackTargetArmyId));
                 continue;

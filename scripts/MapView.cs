@@ -131,6 +131,7 @@ public partial class MapView : Node2D
                 {
                     var sl = gm2.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == ps.Id);
                     if (sl != null) _camera.Position = sl.Position;
+                    else _camera.Position = new Vector2(MapWidth / 2f, MapHeight / 2f);
                 }
             }
             _camera.Zoom = new Vector2(3.0f, 3.0f);
@@ -167,24 +168,6 @@ public partial class MapView : Node2D
 
         _camera.WorldW = MapWidth;
         _camera.WorldH = MapHeight;
-
-        // init game systems first to get player sect
-        InitGame();
-
-        // center camera on player's sect mountain gate, zoomed out
-        var gm2 = GetNodeOrNull<GameManager>("GameManager");
-        if (gm2 != null)
-        {
-            var playerSect = gm2.State.PlayerSect;
-            if (playerSect != null)
-            {
-                var sectLoc = gm2.Locations.FirstOrDefault(l =>
-                    l.Type == LocationType.Sect && l.OwnerSectId == playerSect.Id);
-                if (sectLoc != null)
-                    _camera.Position = sectLoc.Position;
-            }
-        }
-        _camera.Zoom = new Vector2(3.0f, 3.0f);
 
         GD.Print($"[MapView] _Ready done in {Time.GetTicksMsec() - t0}ms");
     }
@@ -235,9 +218,12 @@ public partial class MapView : Node2D
             int ownerIdx = _locations[i].OwnerIndex;
             if (ownerIdx >= 0 && ownerIdx < gm.State.Sects.Count)
             {
-                gm.Locations[i].OwnerSectId = gm.State.Sects[ownerIdx].Id;
-                // also seed initial influence
-                gm.Locations[i].AddInfluence(gm.State.Sects[ownerIdx].Id, 50);
+                int sid = gm.State.Sects[ownerIdx].Id;
+                gm.Locations[i].OwnerSectId = sid;
+                gm.Locations[i].AddInfluence(sid, 50);
+                // track city ownership
+                if (_locations[i].Type == LocationType.City)
+                    gm.State.Sects[ownerIdx].ControlledCityIds.Add(gm.Locations[i].Id);
             }
         }
 

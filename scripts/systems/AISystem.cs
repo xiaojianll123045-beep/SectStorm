@@ -285,9 +285,10 @@ public class AISystem
     private void CreateAIResponseArmy(SectData sect)
     {
         var disciples = _gm.State.Disciples.Where(d => d.SectId == sect.Id && d.State == "idle").Take(10).ToList();
-        if (disciples.Count < 3) return;
+        if (disciples.Count < 3) { GD.Print($"[AI] {sect.Name} 弟子不足(={disciples.Count})，无法造兵"); return; }
         var home = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == sect.Id);
-        if (home == null) return;
+        if (home == null) { GD.Print($"[AI] {sect.Name} 找不到山门"); return; }
         _gm.CreateArmy(sect.Id, disciples.Select(d => d.Id).ToList(), home.Position);
+        GD.Print($"[AI] {sect.Name} 派出部队 ({disciples.Count}人)");
     }
 }
