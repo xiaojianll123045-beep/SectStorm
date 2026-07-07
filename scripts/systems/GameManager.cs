@@ -62,10 +62,19 @@ public partial class GameManager : Node
     {
         _turnTimer = new Timer();
         _turnTimer.OneShot = true;
-        _turnTimer.WaitTime = 0.001f; // debug: no wait between turns
+        _turnTimer.WaitTime = 0.001f;
         _turnTimer.Timeout += () => {
-            if (_turnRunning) {
-                GD.Print("[Game] TURN SKIPPED (still running)");
+            // AI completion check (runs even while AiProcessing is true)
+            if (_aiTask != null && _aiTask.IsCompleted)
+            {
+                _aiTask = null;
+                AiProgress = AiTotal;
+                AiProcessing = false;
+                GD.Print($"  AI done, resuming turns");
+                _turnTimer.Start();
+                return;
+            }
+            if (_turnRunning || AiProcessing) {
                 _turnTimer.Start(0.1f);
                 return;
             }
@@ -76,7 +85,20 @@ public partial class GameManager : Node
             int dt = (int)(Time.GetTicksMsec() - t0);
             if (dt > 200) GD.Print($"[Game] Turn took {dt}ms");
             _turnRunning = false;
-            _turnTimer.Start();
+
+            // AI: stop timer and run in background
+            if (State.TotalTurns % 9 == 0 && _aiTask == null)
+            {
+                AiProcessing = true;
+                AiTotal = _ai.BatchCount();
+                AiProgress = 0;
+                _aiTask = System.Threading.Tasks.Task.Run(() => {
+                    try { _ai.ProcessAllAi(); }
+                    catch (System.Exception e) { GD.PrintErr($"[Game] AI error: {e.Message}"); }
+                });
+            }
+
+            if (_aiTask == null) _turnTimer.Start();
         };
         AddChild(_turnTimer);
         _turnTimer.Start();
@@ -234,27 +256,13 @@ public partial class GameManager : Node
             if (war.Ended) Wars.Remove(war);
         }
 
-        // AI (background thread, pauses turn timer)
-        if (State.TotalTurns % 9 == 0 && _aiTask == null)
-        {
-            GD.Print($"  AI start (background)...");
-            AiProcessing = true;
-            AiTotal = _ai.BatchCount();
-            AiProgress = 0;
-            _turnTimer.Stop();
-            _aiTask = System.Threading.Tasks.Task.Run(() => {
-                try { _ai.ProcessAllAi(); }
-                catch (System.Exception e) { GD.PrintErr($"[Game] AI task error: {e.Message}"); }
-            });
-        }
         // check if AI task completed
         if (_aiTask != null && _aiTask.IsCompleted)
         {
             _aiTask = null;
             AiProgress = AiTotal;
             AiProcessing = false;
-            GD.Print($"  AI done, resuming turns");
-            _turnRunning = false;
+            GD.Print($"  AI done");
             _turnTimer.Start();
         }
 
