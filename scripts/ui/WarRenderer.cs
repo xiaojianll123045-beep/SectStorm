@@ -16,12 +16,8 @@ public partial class WarRenderer : Node2D
         if (_gm == null) _gm = GetNodeOrNull<GameManager>("GameManager");
         if (_gm == null) return;
 
-        // clear old arrows
         foreach (var c in GetChildren())
             c.QueueFree();
-
-        float arrowLen = 20f;
-        float headSize = 8f;
 
         foreach (var war in _gm.Wars)
         {
@@ -39,40 +35,49 @@ public partial class WarRenderer : Node2D
             Vector2 dir = (b - a).Normalized();
             float dist = (b - a).Length();
 
-            // draw multiple arrows along the line
-            int count = Mathf.Max(2, (int)(dist / 300f));
-            for (int i = 1; i < count; i++)
+            int count = Mathf.Max(1, (int)(dist / 600f));
+            for (int i = 0; i < count; i++)
             {
-                float t = i / (float)count;
+                float t = (i + 0.5f) / count;
                 Vector2 pos = a + dir * dist * t;
-                // alternate offset to avoid overlap
-                Vector2 perp = new Vector2(-dir.Y, dir.X) * (i % 2 == 0 ? 15f : -15f);
+                Vector2 perp = new Vector2(-dir.Y, dir.X) * 20f;
 
                 var arrow = new Node2D();
-                arrow.Position = pos + perp;
+                arrow.Position = pos + perp * ((i % 2 == 0) ? 1 : -1);
+                arrow.Rotation = dir.Angle();
                 AddChild(arrow);
 
-                // shaft
-                var shaft = new ColorRect();
-                shaft.Size = new Vector2(arrowLen, 2);
-                shaft.Color = new Color(0.9f, 0.15f, 0.15f, 0.8f);
-                shaft.Position = new Vector2(0, -1);
-                shaft.Rotation = dir.Angle();
-                arrow.AddChild(shaft);
-
-                // arrow head
-                float angle = dir.Angle();
-                var head = new Polygon2D();
-                head.Polygon = new Vector2[] {
-                    new Vector2(arrowLen, 0),
-                    new Vector2(arrowLen - headSize, -headSize / 2),
-                    new Vector2(arrowLen - headSize, headSize / 2),
-                };
-                head.Color = new Color(0.9f, 0.15f, 0.15f, 0.8f);
-                head.Position = new Vector2(0, 0);
-                head.Rotation = angle;
-                arrow.AddChild(head);
+                // shaft (white outline + red fill)
+                DrawArrowShaft(arrow, 60f, 6f, 16f);
             }
         }
+    }
+
+    private void DrawArrowShaft(Node2D parent, float length, float thickness, float headSize)
+    {
+        // white outline (slightly larger)
+        DrawSingleArrow(parent, length + 2, thickness + 2, headSize + 2, new Color(1, 1, 1, 0.9f));
+        // red fill
+        DrawSingleArrow(parent, length, thickness, headSize, new Color(0.9f, 0.1f, 0.1f, 0.85f));
+    }
+
+    private void DrawSingleArrow(Node2D parent, float len, float thick, float head, Color color)
+    {
+        // shaft as a thick ColorRect
+        var shaft = new ColorRect();
+        shaft.Size = new Vector2(len, thick);
+        shaft.Color = color;
+        shaft.Position = new Vector2(0, -thick / 2f);
+        parent.AddChild(shaft);
+
+        // arrowhead as polygon
+        var headPoly = new Polygon2D();
+        headPoly.Polygon = new Vector2[] {
+            new Vector2(len, 0),
+            new Vector2(len - head, -head / 2),
+            new Vector2(len - head, head / 2),
+        };
+        headPoly.Color = color;
+        parent.AddChild(headPoly);
     }
 }
