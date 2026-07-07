@@ -71,6 +71,8 @@ public partial class PauseMenu : Control
     {
         _open = !_open;
         Visible = _open;
+        var gm = GetNodeOrNull<GameManager>("../../GameManager");
+        if (gm != null) gm.SetPaused(_open);
     }
 
     // ---- Save/Load Slots ----

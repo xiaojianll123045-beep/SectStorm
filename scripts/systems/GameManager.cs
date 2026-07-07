@@ -48,6 +48,14 @@ public partial class GameManager : Node
     }
 
     private bool _turnRunning;
+    private bool _paused;
+
+    public void SetPaused(bool p)
+    {
+        _paused = p;
+        if (p && _turnTimer != null) _turnTimer.Stop();
+        else if (!p && _turnTimer != null) _turnTimer.Start();
+    }
 
     public void StartGameLoop()
     {
