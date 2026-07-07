@@ -10,17 +10,17 @@ public partial class PauseMenu : Control
     public override void _Ready()
     {
         Visible = false;
-        SetAnchorsPreset(LayoutPreset.FullRect);
+        Size = GetViewportRect().Size;
 
         var overlay = new ColorRect();
         overlay.Color = new Color(0, 0, 0, 0.6f);
-        overlay.SetAnchorsPreset(LayoutPreset.FullRect);
+        overlay.Size = Size;
         AddChild(overlay);
 
+        var vs = GetViewportRect().Size;
         var panel = new Panel();
-        panel.SetAnchorsPreset(LayoutPreset.Center);
+        panel.Position = new Vector2(vs.X / 2f - 130, vs.Y / 2f - 170);
         panel.Size = new Vector2(260, 340);
-        panel.Position = new Vector2(-130, -170);
         var ps = new StyleBoxFlat();
         ps.BgColor = new Color(0.10f, 0.10f, 0.12f);
         ps.CornerRadiusTopLeft = 8; ps.CornerRadiusTopRight = 8;
@@ -87,15 +87,22 @@ public partial class PauseMenu : Control
         title.AddThemeColorOverride("font_color", new Color(0.7f, 0.5f, 0.2f));
         _slotBox.AddChild(title);
 
-        // auto-save slot
         AddSlotRow("自动存档", saves.Contains("autosave"), saving, "autosave");
 
-        // 5 manual slots
         for (int i = 1; i <= 5; i++)
         {
             int s = i;
             string slotName = $"slot{s}";
             AddSlotRow($"存档位 {s}", saves.Contains(slotName), saving, slotName);
+        }
+
+        if (!saving && saves.Length == 0)
+        {
+            var noSave = new Label();
+            noSave.Text = "没有找到存档";
+            noSave.AddThemeFontSizeOverride("font_size", 12);
+            noSave.AddThemeColorOverride("font_color", new Color(0.5f, 0.5f, 0.55f));
+            _slotBox.AddChild(noSave);
         }
 
         var closeBtn = new Button();
@@ -163,20 +170,20 @@ public partial class PauseMenu : Control
     private void BuildSlotPanel()
     {
         _slotPanel = new Control();
-        _slotPanel.SetAnchorsPreset(LayoutPreset.FullRect);
+        _slotPanel.Size = Size;
         _slotPanel.Visible = false;
         AddChild(_slotPanel);
 
         var overlay = new ColorRect();
         overlay.Color = new Color(0, 0, 0, 0.5f);
-        overlay.SetAnchorsPreset(LayoutPreset.FullRect);
+        overlay.Size = Size;
         overlay.MouseFilter = Control.MouseFilterEnum.Pass;
         _slotPanel.AddChild(overlay);
 
+        var vs = GetViewportRect().Size;
         var panel = new Panel();
-        panel.SetAnchorsPreset(LayoutPreset.Center);
+        panel.Position = new Vector2(vs.X / 2f - 125, vs.Y / 2f - 160);
         panel.Size = new Vector2(250, 320);
-        panel.Position = new Vector2(-125, -160);
         var ps = new StyleBoxFlat();
         ps.BgColor = new Color(0.10f, 0.10f, 0.12f);
         ps.CornerRadiusTopLeft = 8; ps.CornerRadiusTopRight = 8;

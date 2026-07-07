@@ -123,10 +123,24 @@ public partial class MenuManager : Control
 
     private void OnLoadGame()
     {
-        // show load panel in main menu (simplified: pick from saves)
         var saves = SaveLoadManager.ListSaves();
-        if (saves.Length == 0) { GD.Print("没有存档"); return; }
-        // auto-load first available save for now
+        if (saves.Length == 0)
+        {
+            // show a brief message
+            var msg = new Label();
+            msg.Text = "没有找到存档";
+            msg.AddThemeFontSizeOverride("font_size", 14);
+            msg.AddThemeColorOverride("font_color", new Color(0.85f, 0.85f, 0.90f));
+            msg.SetAnchorsPreset(Control.LayoutPreset.Center);
+            msg.Position = new Vector2(-60, -10);
+            msg.Size = new Vector2(120, 20);
+            AddChild(msg);
+            var t = new Timer();
+            t.OneShot = true; t.WaitTime = 2.0f;
+            t.Timeout += () => { msg.QueueFree(); t.QueueFree(); };
+            AddChild(t); t.Start();
+            return;
+        }
         OnStartGameWithLoad(saves[0]);
     }
 
