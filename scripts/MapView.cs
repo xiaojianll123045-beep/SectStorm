@@ -538,6 +538,8 @@ public partial class MapView : Node2D
         return _locations[idx].Position;
     }
 
+    public void HideTooltip() { _tooltip.Hide(); _hoveredIdx = -1; }
+
     private void ShowTooltip(MapLocation loc)
     {
         _tooltip.Text = $"{loc.Name} ({loc.Type})";
@@ -562,21 +564,28 @@ public partial class MapView : Node2D
 
     public void OnLoadGame()
     {
-        // regenerate visual map from loaded game state
         var gm = GetNodeOrNull<GameManager>("GameManager");
         if (gm == null) return;
         _seed = gm.State.Seed;
-        ImageTexture tex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
 
-        // clear and regenerate markers
+        // rebuild _locations from loaded gm.Locations
         foreach (var c in _markerLayer.GetChildren())
             c.QueueFree();
-        // re-generate map locations from seed
-        _locations = MapLocations.Generate(MapWidth, MapHeight, _seed);
+        _locations = new List<MapLocation>();
+        foreach (var ld in gm.Locations)
+        {
+            var ml = new MapLocation(ld.Position, ld.Name, ld.Type, ld.Population);
+            // set OwnerIndex from the loaded data
+            for (int i = 0; i < gm.State.Sects.Count; i++)
+            {
+                if (gm.State.Sects[i].Id == ld.OwnerSectId)
+                { ml.OwnerIndex = i; break; }
+            }
+            _locations.Add(ml);
+        }
         PlaceMarkers();
         ApplyTerritory();
 
-        // center on player sect
         var ps = gm.State.PlayerSect;
         if (ps != null)
         {

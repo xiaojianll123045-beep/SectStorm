@@ -73,6 +73,9 @@ public partial class PauseMenu : Control
         Visible = _open;
         var gm = GetNodeOrNull<GameManager>("../../GameManager");
         if (gm != null) gm.SetPaused(_open);
+        // hide tooltip while paused
+        var mv = GetNodeOrNull<MapView>("../..");
+        if (mv != null) mv.Call("HideTooltip");
     }
 
     // ---- Save/Load Slots ----
