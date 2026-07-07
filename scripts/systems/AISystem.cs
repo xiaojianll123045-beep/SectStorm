@@ -9,24 +9,20 @@ public class AISystem
 
     public AISystem(GameManager gm) => _gm = gm;
 
-    private int _warsThisTick;
-
     public void ProcessAllAi()
     {
-        _warsThisTick = 0;
         foreach (var sect in _gm.State.AiSects.ToList())
         {
             if (!sect.IsAlive) continue;
             if (sect.LastDecisionTurn == _gm.State.TotalTurns) continue;
             sect.LastDecisionTurn = _gm.State.TotalTurns;
 
-            // check if already in a war
             var myWar = _gm.Wars.FirstOrDefault(w =>
                 (w.AttackerSectId == sect.Id || w.DefenderSectId == sect.Id) && !w.Ended);
 
             if (myWar != null)
                 ProcessWarAI(sect, myWar);
-            else if (_warsThisTick < 3) // max 3 new wars per AI tick
+            else
                 ProcessPeaceAI(sect);
         }
     }
@@ -60,7 +56,6 @@ public class AISystem
             if (aggressive || balanced)
             {
                 _gm.DeclareWar(sect.Id, best.sect.Id);
-                _warsThisTick++;
                 CreateAIResponseArmy(sect);
             }
         }

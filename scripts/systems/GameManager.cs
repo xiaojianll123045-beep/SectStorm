@@ -45,15 +45,19 @@ public partial class GameManager : Node
     {
         _turnTimer = new Timer();
         _turnTimer.OneShot = true;
-        _turnTimer.WaitTime = 0.3f;
+        _turnTimer.WaitTime = 2.0f;
         _turnTimer.Timeout += () => {
-            if (_turnRunning) return;
+            if (_turnRunning) {
+                GD.Print("[Game] TURN SKIPPED (still running)");
+                _turnTimer.Start(0.1f);
+                return;
+            }
             _turnRunning = true;
             var t0 = Time.GetTicksMsec();
             try { ProcessTurn(); }
             catch (System.Exception e) { GD.PrintErr($"[Game] Turn error: {e.Message}"); }
             int dt = (int)(Time.GetTicksMsec() - t0);
-            if (dt > 300) GD.Print($"[Game] Long turn: {dt}ms");
+            if (dt > 200) GD.Print($"[Game] Turn took {dt}ms");
             _turnRunning = false;
             _turnTimer.Start();
         };
