@@ -364,12 +364,20 @@ public partial class MapView : Node2D
 
         _info.Text = $"Seed: {_seed}  |  城{CountType(LocationType.City)} 村{CountType(LocationType.Village)} 宗{CountType(LocationType.Sect)}  |  {MapWidth}x{MapHeight}";
 
+        // skip hover if pause menu is open
+        var pauseMenu = GetNodeOrNull<PauseMenu>("UI/PauseMenu");
+        bool paused = pauseMenu != null && pauseMenu.Visible;
+
         // territory-based hover
         Vector2 mouseWorld = GetGlobalMousePosition();
         int seedIdx = SeedAtWorldPos(mouseWorld);
         if (seedIdx < 0 || seedIdx >= _locations.Count) seedIdx = -1;
 
-        if (seedIdx != _hoveredIdx)
+        if (paused)
+        {
+            if (_tooltip.Visible) _tooltip.Hide();
+        }
+        else if (seedIdx != _hoveredIdx)
         {
             _hoveredIdx = seedIdx;
             if (_hoveredIdx >= 0)
@@ -378,7 +386,7 @@ public partial class MapView : Node2D
                 _tooltip.Hide();
         }
 
-        if (_tooltip.Visible && _hoveredIdx >= 0)
+        if (!paused && _tooltip.Visible && _hoveredIdx >= 0)
         {
             Vector2 pos = LocationPos(_hoveredIdx);
             Vector2 screen = _camera.GetCanvasTransform() * pos;
