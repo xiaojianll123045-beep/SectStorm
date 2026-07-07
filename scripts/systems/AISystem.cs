@@ -88,15 +88,19 @@ public class AISystem
             else
             {
                 // attack nearest enemy city
+                // nearest city by squared distance
                 var targetLoc = _gm.Locations
                     .Where(l => l.OwnerSectId == enemyId && l.Type == LocationType.City)
-                    .OrderBy(l => (l.Position - army.Position).Length())
+                    .OrderBy(l => { float dx = l.Position.X - army.Position.X; float dy = l.Position.Y - army.Position.Y; return dx * dx + dy * dy; })
                     .FirstOrDefault();
                 if (targetLoc != null)
                 {
                     army.MoveTarget = targetLoc.Position;
                     army.Order = ArmyOrder.Moving;
-                    army.TurnsUntilArrival = (int)((army.Position - targetLoc.Position).Length() / 50f) + 1;
+                    float dx = army.Position.X - targetLoc.Position.X;
+                    float dy = army.Position.Y - targetLoc.Position.Y;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    army.TurnsUntilArrival = (int)(dist / 50f) + 1;
                 }
             }
         }
@@ -147,9 +151,15 @@ public class AISystem
     {
         if (a == null || b == null) return false;
         var aLocs = _gm.Locations.Where(l => l.OwnerSectId == a.Id).ToList();
+        var bLocs = _gm.Locations.Where(l => l.OwnerSectId == b.Id).ToList();
+        float rangeSq = 500f * 500f;
         foreach (var al in aLocs)
-            foreach (var bl in _gm.Locations.Where(l => l.OwnerSectId == b.Id))
-                if ((al.Position - bl.Position).Length() < 500f) return true;
+            foreach (var bl in bLocs)
+            {
+                float dx = al.Position.X - bl.Position.X;
+                float dy = al.Position.Y - bl.Position.Y;
+                if (dx * dx + dy * dy < rangeSq) return true;
+            }
         return false;
     }
 }
