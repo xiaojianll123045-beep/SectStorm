@@ -94,6 +94,10 @@ public partial class MapView : Node2D
         eventPopup.Name = "EventPopup";
         AddChild(eventPopup);
 
+        var toast = new Toast();
+        toast.Name = "Toast";
+        AddChild(toast);
+
         _info = new Label();
         _info.Name = "Info";
         _info.Position = new Vector2(10, 10);
