@@ -74,8 +74,24 @@ public class AISystem
             bool aggr = sect.Personality == AIPersonality.Aggressive || _rng.Value.Next(3) == 0;
             if (aggr)
             {
-                _gm.DeclareWar(sect.Id, best.sect.Id);
+                int enemyId = best.sect.Id;
+                _gm.DeclareWar(sect.Id, enemyId);
                 CreateAIResponseArmy(sect);
+                // immediately order the new army to attack
+                var newArmy = GetArmy(sect.Id);
+                if (newArmy != null)
+                {
+                    var targetCity = _gm.Locations
+                        .Where(l => l.OwnerSectId == enemyId && l.Type == LocationType.City)
+                        .OrderByDescending(l => l.Prosperity)
+                        .ThenBy(l => (l.Position - newArmy.Position).LengthSquared())
+                        .FirstOrDefault();
+                    if (targetCity != null)
+                    {
+                        newArmy.MoveTarget = targetCity.Position;
+                        newArmy.Order = ArmyOrder.Moving;
+                    }
+                }
                 return;
             }
         }

@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 using System.Linq;
 
 public partial class WarRenderer : Node2D
@@ -19,7 +20,9 @@ public partial class WarRenderer : Node2D
         foreach (var c in GetChildren())
             c.QueueFree();
 
-        foreach (var war in _gm.Wars)
+        List<WarData> warsSnapshot;
+        lock (_gm.Wars) { warsSnapshot = _gm.Wars.Where(w => !w.Ended).ToList(); }
+        foreach (var war in warsSnapshot)
         {
             if (war.Ended) continue;
             var atkSect = _gm.State.GetSect(war.AttackerSectId);
