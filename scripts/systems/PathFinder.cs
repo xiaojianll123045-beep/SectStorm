@@ -28,8 +28,9 @@ public static class PathFinder
             if (owner >= 0 && owner != armySectId)
             {
                 var rel = state.GetRelation(armySectId, owner);
-                if (rel != null && rel.Favor < -20)
-                    return null; // blocked by hostile territory
+                if (rel == null) continue; // no relation = passable
+                if (rel.State == RelationState.Ally || rel.State == RelationState.War) continue; // ally/enemy = passable
+                if (rel.Favor < -20) return null; // hostile neutral = blocked
             }
         }
 
