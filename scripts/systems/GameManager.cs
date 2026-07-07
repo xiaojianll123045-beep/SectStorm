@@ -172,9 +172,10 @@ public partial class GameManager : Node
         // AI
         if (State.TotalTurns % 9 == 0)
         {
-            GD.Print($"  AI processing...");
+            GD.Print($"  AI start...");
+            var t0 = Time.GetTicksMsec();
             _ai.ProcessAllAi();
-            GD.Print($"  AI done");
+            GD.Print($"  AI done ({Time.GetTicksMsec() - t0}ms)");
         }
         GD.Print($"=== Turn {State.TotalTurns} done ===");
     }
