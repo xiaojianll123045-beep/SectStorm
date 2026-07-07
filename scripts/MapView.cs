@@ -548,6 +548,33 @@ public partial class MapView : Node2D
         Generate();
     }
 
+    public void OnLoadGame()
+    {
+        // regenerate visual map from loaded game state
+        var gm = GetNodeOrNull<GameManager>("GameManager");
+        if (gm == null) return;
+        _seed = gm.State.Seed;
+        ImageTexture tex = MapGenerator.GenerateTerrain(MapWidth, MapHeight, _seed);
+
+        // clear and regenerate markers
+        foreach (var c in _markerLayer.GetChildren())
+            c.QueueFree();
+        // re-generate map locations from seed
+        _locations = MapLocations.Generate(MapWidth, MapHeight, _seed);
+        PlaceMarkers();
+        ApplyTerritory();
+
+        // center on player sect
+        var ps = gm.State.PlayerSect;
+        if (ps != null)
+        {
+            var sl = gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == ps.Id);
+            if (sl != null) _camera.Position = sl.Position;
+        }
+        _camera.Zoom = new Vector2(3.0f, 3.0f);
+        GD.Print("[MapView] Load complete");
+    }
+
     private int CountType(LocationType t)
     {
         if (_locations == null) return 0;

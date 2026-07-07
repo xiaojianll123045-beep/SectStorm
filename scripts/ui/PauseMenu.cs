@@ -89,10 +89,18 @@ public partial class PauseMenu : Control
                 loadBtn.AddThemeFontSizeOverride("font_size", 11);
                 loadBtn.Pressed += () =>
                 {
-                    var gm = GetNodeOrNull<GameManager>("../GameManager");
+                    var gm = GetNodeOrNull<GameManager>("../../GameManager");
                     if (gm == null) return;
                     if (saving) SaveLoadManager.SaveGame(gm, slotName);
-                    else { SaveLoadManager.LoadGame(gm, slotName); _slotPanel.Visible = false; }
+                    else
+                    {
+                        SaveLoadManager.LoadGame(gm, slotName);
+                        _slotPanel.Visible = false;
+                        Visible = false; _open = false;
+                        // signal MapView to regenerate visuals
+                        var mv = GetNodeOrNull<MapView>("../..");
+                        mv?.Call("OnLoadGame");
+                    }
                 };
                 hbox.AddChild(loadBtn);
             }
