@@ -4,6 +4,8 @@ using System.Linq;
 
 public partial class MapView : Node2D
 {
+    public static string LoadSlotOnStart;
+
     [Export] public int MapWidth = 16384;
     [Export] public int MapHeight = 16384;
 
@@ -129,6 +131,16 @@ public partial class MapView : Node2D
             catch (System.Exception e) { GD.PrintErr($"[MapView] Generate: {e}\n{e.StackTrace}"); }
             try { InitGame(); }
             catch (System.Exception e) { GD.PrintErr($"[MapView] InitGame: {e}\n{e.StackTrace}"); }
+
+            // load saved game if slot was specified
+            if (!string.IsNullOrEmpty(LoadSlotOnStart))
+            {
+                var gm = GetNodeOrNull<GameManager>("GameManager");
+                if (gm != null) SaveLoadManager.LoadGame(gm, LoadSlotOnStart);
+                LoadSlotOnStart = null;
+                OnLoadGame(); // regenerate visuals from loaded state
+            }
+
             _camera.WorldW = MapWidth;
             _camera.WorldH = MapHeight;
             var gm2 = GetNodeOrNull<GameManager>("GameManager");

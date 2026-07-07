@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 
 public partial class MenuManager : Control
 {
@@ -60,8 +61,9 @@ public partial class MenuManager : Control
         AddChild(btnBox);
 
         AddMenuBtn(btnBox, "开始游戏", () => OnStartGame());
+        AddMenuBtn(btnBox, "继续游戏", () => OnContinue());
+        AddMenuBtn(btnBox, "读取存档", () => OnLoadGame());
         AddMenuBtn(btnBox, "模组管理", () => OnMods());
-        AddMenuBtn(btnBox, "DLC", () => OnDLC());
         AddMenuBtn(btnBox, "设置", () => OnSettings());
         AddMenuBtn(btnBox, "关于", () => OnAbout());
         AddMenuBtn(btnBox, "退出", () => OnQuit());
@@ -107,6 +109,53 @@ public partial class MenuManager : Control
         s.ContentMarginLeft = 12;
         s.ContentMarginRight = 12;
         return s;
+    }
+
+    private void OnContinue()
+    {
+        // load autosave and jump to game
+        var saves = SaveLoadManager.ListSaves();
+        if (saves.Contains("autosave"))
+            OnStartGameWithLoad("autosave");
+        else
+            OnStartGame();
+    }
+
+    private void OnLoadGame()
+    {
+        // show load panel in main menu (simplified: pick from saves)
+        var saves = SaveLoadManager.ListSaves();
+        if (saves.Length == 0) { GD.Print("没有存档"); return; }
+        // auto-load first available save for now
+        OnStartGameWithLoad(saves[0]);
+    }
+
+    private void OnStartGameWithLoad(string slotName)
+    {
+        var loading = ResourceLoader.Load<PackedScene>("res://scenes/LoadingScreen.tscn").Instantiate<LoadingScreen>();
+        GetTree().Root.AddChild(loading);
+        loading.SetProgress(0);
+        int step = 0;
+        var timer = new Timer();
+        timer.WaitTime = 0.01;
+        timer.Timeout += () =>
+        {
+            step++;
+            switch (step)
+            {
+                case 1: loading.SetStatus("正在加载存档..."); loading.SetProgress(1); break;
+                case 2: loading.SetStatus("正在生成地图..."); loading.SetProgress(2); break;
+                case 3:
+                    timer.Stop(); timer.QueueFree();
+                    loading.Complete(); loading.QueueFree();
+                    GetTree().ChangeSceneToFile("res://scenes/MapView.tscn");
+                    // pass slot name via a static or signal
+                    MapView.LoadSlotOnStart = slotName;
+                    break;
+            }
+        };
+        AddChild(timer);
+        timer.Start();
     }
 
     private void OnStartGame()
