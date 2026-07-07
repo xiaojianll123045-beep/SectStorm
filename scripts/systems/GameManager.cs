@@ -307,8 +307,8 @@ public partial class GameManager : Node
 
     public int CreateDisciple(string name, int sectId, LocationData source)
     {
+        if (source == null) { GD.PrintErr("CreateDisciple: source is null"); return -1; }
         var d = new DiscipleData(State.NextDiscipleId++, name);
-        d.SectId = sectId;
         d.SectId = sectId;
         float quality = source.Prosperity / 100f;
         d.Combat = (int)(d.Combat * (0.5f + quality));

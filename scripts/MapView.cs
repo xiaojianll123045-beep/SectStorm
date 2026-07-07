@@ -239,15 +239,13 @@ public partial class MapView : Node2D
             }
         }
 
-        // give each sect initial disciples
+        // give each sect initial disciples (skip if home location not found)
         foreach (var sect in gm.State.Sects)
         {
             var home = gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == sect.Id);
-            if (home == null) home = gm.Locations.FirstOrDefault(l => l.OwnerSectId == sect.Id);
+            if (home == null) continue;
             for (int di = 0; di < 4; di++)
-            {
                 gm.CreateDisciple($"{sect.Name}弟子{di + 1}", sect.Id, home);
-            }
             sect.Lingshi = 200;
         }
 
