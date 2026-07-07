@@ -301,15 +301,8 @@ public class AISystem
 
     private bool HasPathTo(SectData from, SectData to)
     {
-        var fromHome = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == from.Id);
-        var toHome = _gm.Locations.FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == to.Id);
-        if (fromHome == null || toHome == null) return false;
-        // must be within reasonable range (2000px) or share a border
-        float dx = fromHome.Position.X - toHome.Position.X;
-        float dy = fromHome.Position.Y - toHome.Position.Y;
-        float distSq = dx * dx + dy * dy;
-        if (distSq > 2000f * 2000f && !SharesBorderCached(from, to)) return false;
-        return true;
+        // only declare war on bordering sects
+        return SharesBorderCached(from, to);
     }
 
     private void CreateAIResponseArmy(SectData sect)
