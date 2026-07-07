@@ -18,11 +18,8 @@ public partial class FogRenderer : Sprite2D
 
     public override void _Process(double delta)
     {
-        if (_gm == null || _gm.State == null) return;
-        int turn = _gm.State.TotalTurns;
-        if (_lastUpdateTurn == turn) return;
-        _lastUpdateTurn = turn;
-        Refresh();
+        Visible = false; // fog temporarily disabled
+        return;
     }
 
     private void Refresh()

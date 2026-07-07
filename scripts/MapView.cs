@@ -98,6 +98,10 @@ public partial class MapView : Node2D
         toast.Name = "Toast";
         AddChild(toast);
 
+        var warRenderer = new WarRenderer();
+        warRenderer.Name = "WarRenderer";
+        AddChild(warRenderer);
+
         _info = new Label();
         _info.Name = "Info";
         _info.Position = new Vector2(10, 10);
