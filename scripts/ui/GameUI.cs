@@ -16,8 +16,8 @@ public partial class GameUI : CanvasLayer
 
     public override void _Ready()
     {
-        _mapView = GetParent<MapView>();
-        _gm = GetNodeOrNull<GameManager>("GameManager");
+        _mapView = GetParent().GetParent<MapView>();
+        _gm = _mapView?.GetNodeOrNull<GameManager>("GameManager");
         if (_gm == null) _gm = _mapView?.GetNodeOrNull<GameManager>("GameManager");
 
         BuildTopBar();
@@ -29,7 +29,7 @@ public partial class GameUI : CanvasLayer
         var bar = new ColorRect();
         bar.Color = new Color(0.08f, 0.08f, 0.10f, 0.85f);
         bar.SetAnchorsPreset(Control.LayoutPreset.TopWide);
-        bar.Size = new Vector2(0, 28);
+        bar.SetDeferred("size", new Vector2(0, 28));
         AddChild(bar);
 
         var font = new Label();

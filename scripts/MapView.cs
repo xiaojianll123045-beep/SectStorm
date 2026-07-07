@@ -62,6 +62,11 @@ public partial class MapView : Node2D
         armyRenderer.Name = "ArmyRenderer";
         AddChild(armyRenderer);
 
+        var fog = new FogRenderer();
+        fog.Name = "FogOfWar";
+        fog.Init(null, MapWidth, MapHeight);
+        AddChild(fog);
+
         var gameUI = new GameUI();
         gameUI.Name = "GameUI";
         canvas.AddChild(gameUI);
@@ -181,6 +186,11 @@ public partial class MapView : Node2D
 
         gm.InitSects(playerIdx);
         gm.StartGameLoop();
+
+        // set up fog with game manager
+        var fogNode = GetNodeOrNull<FogRenderer>("FogOfWar");
+        if (fogNode != null) fogNode.Init(gm, MapWidth, MapHeight);
+
         GD.Print("[MapView] game systems initialized");
     }
 
