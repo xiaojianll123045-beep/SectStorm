@@ -410,21 +410,16 @@ public partial class MapView : Node2D
                 if (GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Visible == true) { GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Hide(); return; }
                 GetNodeOrNull<PauseMenu>("PauseMenu")?.Toggle();
             }
-            if (k.Keycode == Key.F)
-            {
-                var fog = GetNodeOrNull<FogRenderer>("FogOfWar");
-                if (fog != null) fog.FogEnabled = !fog.FogEnabled;
-                GD.Print($"Fog: {(fog?.FogEnabled == true ? "ON" : "OFF")}");
-            }
+
             if (k.Keycode == Key.D) { var dp = GetNodeOrNull<DiplomacyPanel>("DiplomacyPanel"); if (dp != null && !dp.Visible) dp.Toggle(); }
             if (k.Keycode == Key.A) GetNodeOrNull<ArmyCreator>("ArmyCreator")?.Show();
-            if (k.Keycode == Key.L) GetNodeOrNull<GameUI>("../UI/GameUI")?.ToggleLog();
+            if (k.Keycode == Key.L) GetNodeOrNull<GameUI>("UI/GameUI")?.ToggleLog();
         }
         if (@event is InputEventMouseButton mb && mb.Pressed)
         {
             Vector2 mouseWorld = GetGlobalMousePosition();
             int seedIdx = SeedAtWorldPos(mouseWorld);
-            var ui = GetNodeOrNull<GameUI>("../UI/GameUI");
+            var ui = GetNodeOrNull<GameUI>("UI/GameUI");
 
             if (mb.ButtonIndex == MouseButton.Right)
             {
@@ -505,7 +500,7 @@ public partial class MapView : Node2D
     private void ShowDebugInfo(MapLocation loc)
     {
         var gm = GetNodeOrNull<GameManager>("GameManager");
-        var ui = GetNodeOrNull<GameUI>("../UI/GameUI");
+        var ui = GetNodeOrNull<GameUI>("UI/GameUI");
         if (gm == null || ui == null) return;
         ui.ShowLocationInfo(loc);
         var ld = gm.Locations.FirstOrDefault(l => l.Name == loc.Name);
@@ -519,15 +514,15 @@ public partial class MapView : Node2D
     private void ShowGlobalInfo()
     {
         var gm = GetNodeOrNull<GameManager>("GameManager");
-        var ui = GetNodeOrNull<GameUI>("../UI/GameUI");
+        var ui = GetNodeOrNull<GameUI>("UI/GameUI");
         if (gm == null || ui == null) return;
         ui._bottomPanel.Visible = true;
         string info = $"[b]全局状态[/b]\n";
         info += $"时间: 第{gm.State.Year}年 {gm.State.Month}月 ({gm.State.Xun}/36旬)\n";
         info += $"宗门: {gm.State.Sects.Count(s => s.IsAlive)}存活  战争: {gm.Wars.Count(w => !w.Ended)}\n";
         info += $"部队: {gm.Armies.Count}  弟子: {gm.State.Disciples.Count}\n";
-        info += $"F:开关迷雾  L:事件日志  ESC:关闭面板\n";
-        GetNodeOrNull<GameUI>("../UI/GameUI")._bottomInfo.Text = info;
+        info += $"D:外交  A:编队  L:日志  ESC:暂停\n";
+        GetNodeOrNull<GameUI>("UI/GameUI")._bottomInfo.Text = info;
     }
 
     private Vector2 LocationPos(int idx)

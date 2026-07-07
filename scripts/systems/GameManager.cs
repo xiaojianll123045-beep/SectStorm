@@ -115,7 +115,25 @@ public partial class GameManager : Node
             float dist = (targetPos - army.Position).Length();
             if (dist <= 5f)
             {
-                if (army.Order == ArmyOrder.Moving) army.Order = ArmyOrder.Idle;
+                if (army.Order == ArmyOrder.Moving)
+                {
+                    army.Order = ArmyOrder.Idle;
+                    // capture city/territory at target
+                    var targetLoc = Locations.FirstOrDefault(l => (l.Position - targetPos).Length() < 30f && l.Type != LocationType.Sect);
+                    if (targetLoc != null && targetLoc.OwnerSectId != army.SectId)
+                    {
+                        // reduce enemy influence
+                        if (targetLoc.OwnerSectId >= 0)
+                        {
+                            float current = targetLoc.GetInfluence(targetLoc.OwnerSectId);
+                            targetLoc.Influence[targetLoc.OwnerSectId] = Mathf.Max(0, current - 20f);
+                        }
+                        // increase attacker influence
+                        targetLoc.AddInfluence(army.SectId, 25f);
+                        if (targetLoc.OwnerSectId == army.SectId)
+                            State.Log($"{army.Name} 占领了 {targetLoc.Name}");
+                    }
+                }
                 else if (army.Order == ArmyOrder.Attacking) ResolveArmyBattle(army, Armies.First(a => a.Id == army.AttackTargetArmyId));
                 continue;
             }
@@ -274,14 +292,10 @@ public partial class GameManager : Node
 
     public int OwnerAtPosition(Vector2 pos)
     {
-        float bestDist = float.MaxValue;
         int bestOwner = -1;
-        // check a subset of nearby locations for efficiency
-        int checkCount = Mathf.Min(100, Locations.Count);
-        for (int i = 0; i < checkCount; i++)
+        float bestDist = 200f * 200f; // 200px radius max
+        foreach (var loc in Locations)
         {
-            int idx = (int)((pos.X + pos.Y * 13) % Locations.Count + i) % Locations.Count;
-            var loc = Locations[idx];
             if (loc.OwnerSectId < 0) continue;
             float dx = pos.X - loc.Position.X;
             float dy = pos.Y - loc.Position.Y;

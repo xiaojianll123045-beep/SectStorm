@@ -23,6 +23,17 @@ public partial class GameUI : CanvasLayer
     private RichTextLabel _logText;
     private bool _logVisible;
 
+    private GameManager GM
+    {
+        get
+        {
+            if (_gm != null) return _gm;
+            if (_mapView == null) _mapView = GetParent().GetParent<MapView>();
+            _gm = _mapView?.GetNodeOrNull<GameManager>("GameManager");
+            return _gm;
+        }
+    }
+
     public override void _Ready()
     {
         _mapView = GetParent().GetParent<MapView>();
@@ -137,28 +148,28 @@ public partial class GameUI : CanvasLayer
 
     public override void _Process(double delta)
     {
-        if (_gm == null || _gm.State == null) return;
+        if (GM == null || GM.State == null) return;
         UpdateTopBar();
         UpdateLog();
     }
 
     private void UpdateTopBar()
     {
-        var sect = _gm.State.PlayerSect;
+        var sect = GM.State.PlayerSect;
         if (sect == null) return;
         _lingshiLabel.Text = $"灵石: {(int)sect.Lingshi}";
         _lingshiLabel.AddThemeColorOverride("font_color", Colors.Gold);
         _prestigeLabel.Text = $"声望: {(int)sect.Prestige}";
         _prestigeLabel.AddThemeColorOverride("font_color", new Color(0.8f, 0.6f, 0.3f));
-        int total = _gm.State.Disciples.Count(d => d.SectId == sect.Id);
+        int total = GM.State.Disciples.Count(d => d.SectId == sect.Id);
         _discipleCountLabel.Text = $"弟子: {total}/{sect.MaxDisciples()}";
         _discipleCountLabel.AddThemeColorOverride("font_color", Colors.LightBlue);
-        _dateLabel.Text = $"第{_gm.State.Year}年 {_gm.State.Month}月 ({_gm.State.Xun}/36)";
+        _dateLabel.Text = $"第{GM.State.Year}年 {GM.State.Month}月 ({GM.State.Xun}/36)";
         _dateLabel.AddThemeColorOverride("font_color", new Color(0.6f, 0.6f, 0.7f));
 
-        if (_gm.AiProcessing)
+        if (GM.AiProcessing)
         {
-            _statusLabel.Text = $"AI处理中... ({_gm.AiProgress}/{_gm.AiTotal})";
+            _statusLabel.Text = $"AI处理中... ({GM.AiProgress}/{GM.AiTotal})";
             _statusLabel.Visible = true;
         }
         else if (_statusLabel.Visible)
@@ -169,12 +180,12 @@ public partial class GameUI : CanvasLayer
 
     private void UpdateLog()
     {
-        if (_logVisible && _gm.State.TurnLog.Count > 0)
+        if (_logVisible && GM.State.TurnLog.Count > 0)
         {
             string t = "";
-            int start = Mathf.Max(0, _gm.State.TurnLog.Count - 30);
-            for (int i = start; i < _gm.State.TurnLog.Count; i++)
-                t += _gm.State.TurnLog[i] + "\n";
+            int start = Mathf.Max(0, GM.State.TurnLog.Count - 30);
+            for (int i = start; i < GM.State.TurnLog.Count; i++)
+                t += GM.State.TurnLog[i] + "\n";
             _logText.Text = t;
         }
     }
@@ -191,11 +202,11 @@ public partial class GameUI : CanvasLayer
         _bottomPanel.Visible = true;
         string text = $"[b]{loc.Name}[/b] ({loc.Type})\n";
         text += $"人口: {loc.Population}  ";
-        var ld = _gm?.Locations.FirstOrDefault(l => l.Name == loc.Name);
+        var ld = GM?.Locations.FirstOrDefault(l => l.Name == loc.Name);
         if (ld != null)
         {
             text += $"繁荣: {(int)ld.Prosperity}  忠诚: {(int)ld.Loyalty}  状态: {ld.Status}";
-            text += $"\n所属: {_gm.State.GetSect(ld.OwnerSectId)?.Name ?? "无"}";
+            text += $"\n所属: {GM.State.GetSect(ld.OwnerSectId)?.Name ?? "无"}";
         }
         text += $"\n位置: ({loc.Position.X:F0}, {loc.Position.Y:F0})";
         _bottomInfo.Text = text;
@@ -204,7 +215,7 @@ public partial class GameUI : CanvasLayer
     public void ShowArmyInfo(ArmyData army)
     {
         _bottomPanel.Visible = true;
-        var sect = _gm?.State.GetSect(army.SectId);
+        var sect = GM?.State.GetSect(army.SectId);
         string text = $"[b]部队 #{army.Id}[/b]  所属: {sect?.Name ?? "无"}\n";
         text += $"人数: {army.Count}  战力: {army.EffectiveCombat}  状态: {army.Order}\n";
         text += $"位置: ({army.Position.X:F0}, {army.Position.Y:F0})";
