@@ -12,6 +12,7 @@ public class GameState
     public List<SectData> Sects = new();
     public List<DiscipleData> Disciples = new();
     public List<RelationData> Relations = new();
+    public Dictionary<(int, int), RelationData> RelationMap = new();
     public List<string> TurnLog = new();
     public int NextDiscipleId = 1;
 
@@ -23,8 +24,8 @@ public class GameState
 
     public RelationData GetRelation(int a, int b)
     {
-        return Relations.FirstOrDefault(r =>
-            (r.SectA == a && r.SectB == b) || (r.SectA == b && r.SectB == a));
+        if (a > b) { int t = a; a = b; b = t; }
+        return RelationMap.TryGetValue((a, b), out var r) ? r : null;
     }
 
     public void AdvanceTurn()

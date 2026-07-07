@@ -36,7 +36,12 @@ public partial class GameManager : Node
         State.PlayerSectId = playerSectId;
         for (int i = 0; i < State.Sects.Count; i++)
             for (int j = i + 1; j < State.Sects.Count; j++)
-                State.Relations.Add(new RelationData(State.Sects[i].Id, State.Sects[j].Id));
+            {
+                int a = State.Sects[i].Id, b = State.Sects[j].Id;
+                var rel = new RelationData(a, b);
+                State.Relations.Add(rel);
+                State.RelationMap[(a, b)] = rel;
+            }
     }
 
     private bool _turnRunning;
