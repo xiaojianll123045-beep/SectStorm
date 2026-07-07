@@ -19,7 +19,8 @@ public class AISystem
         var lockObj = new object();
         int done = 0;
 
-        System.Threading.Tasks.Parallel.ForEach(sects, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = 4 }, sect =>
+        int maxThreads = System.Math.Max(1, System.Environment.ProcessorCount - 1);
+        System.Threading.Tasks.Parallel.ForEach(sects, new System.Threading.Tasks.ParallelOptions { MaxDegreeOfParallelism = maxThreads }, sect =>
         {
             if (sect.LastDecisionTurn == _gm.State.TotalTurns) return;
             lock (sect) { sect.LastDecisionTurn = _gm.State.TotalTurns; }
