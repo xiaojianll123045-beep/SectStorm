@@ -4,24 +4,35 @@ using System.Linq;
 
 public static class PathFinder
 {
-    private const int CellSize = 256;
-
-    public struct PathCell { public int X, Y; }
-
     public static List<Vector2> FindPath(Vector2 from, Vector2 to, int armySectId, GameState state, List<LocationData> locations)
     {
-        int cw = 16384 / CellSize;
-        int ch = 16384 / CellSize;
+        // check if any territory along the path is blocked
+        // sample 5 points along the line
+        for (int i = 0; i <= 4; i++)
+        {
+            float t = i / 4f;
+            float px = from.X + (to.X - from.X) * t;
+            float py = from.Y + (to.Y - from.Y) * t;
 
-        int sx = (int)(from.X / CellSize); if (sx < 0) sx = 0; if (sx >= cw) sx = cw - 1;
-        int sy = (int)(from.Y / CellSize); if (sy < 0) sy = 0; if (sy >= ch) sy = ch - 1;
-        int ex = (int)(to.X / CellSize); if (ex < 0) ex = 0; if (ex >= cw) ex = cw - 1;
-        int ey = (int)(to.Y / CellSize); if (ey < 0) ey = 0; if (ey >= ch) ey = ch - 1;
+            int owner = -1;
+            float bestDist = 300f * 300f;
+            foreach (var loc in locations)
+            {
+                if (loc.OwnerSectId < 0) continue;
+                float dx = px - loc.Position.X;
+                float dy = py - loc.Position.Y;
+                float d = dx * dx + dy * dy;
+                if (d < bestDist) { bestDist = d; owner = loc.OwnerSectId; }
+            }
 
-        if (sx == ex && sy == ey)
-            return new List<Vector2> { to };
+            if (owner >= 0 && owner != armySectId)
+            {
+                var rel = state.GetRelation(armySectId, owner);
+                if (rel != null && rel.Favor < -20)
+                    return null; // blocked by hostile territory
+            }
+        }
 
-        // all territory passable - just return direct path
         return new List<Vector2> { to };
     }
 }
