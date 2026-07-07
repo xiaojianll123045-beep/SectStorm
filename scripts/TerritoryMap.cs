@@ -135,12 +135,6 @@ public static class TerritoryMap
                     data[idx * 4] = (byte)(c.R * 255); data[idx * 4 + 1] = (byte)(c.G * 255);
                     data[idx * 4 + 2] = (byte)(c.B * 255); data[idx * 4 + 3] = 255;
                 }
-                else if (diffSeed)
-                {
-                    Color c = CellBorder;
-                    data[idx * 4] = (byte)(c.R * 255); data[idx * 4 + 1] = (byte)(c.G * 255);
-                    data[idx * 4 + 2] = (byte)(c.B * 255); data[idx * 4 + 3] = 255;
-                }
             }
 
         var t0 = Time.GetTicksMsec();

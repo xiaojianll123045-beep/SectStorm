@@ -476,7 +476,7 @@ public partial class MapView : Node2D
                     ui?.ShowContextMenu(GetViewport().GetMousePosition(), items);
                 }
             }
-            else if (mb.ButtonIndex == MouseButton.Left && seedIdx >= 0 && seedIdx < _locations.Count)
+            else if (mb.ButtonIndex == MouseButton.Left && !_camera.WasLeftDrag() && seedIdx >= 0 && seedIdx < _locations.Count)
             {
                 OnLocationClicked(_locations[seedIdx]);
             }

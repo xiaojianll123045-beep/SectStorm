@@ -126,6 +126,8 @@ public class AISystem
     private void ProcessWarAI(SectData sect, WarData war)
     {
         int enemyId = war.AttackerSectId == sect.Id ? war.DefenderSectId : war.AttackerSectId;
+        var enemy = _gm.State.GetSect(enemyId);
+        GD.Print($"[AI] WAR {sect.Name} vs {(enemy?.Name ?? "?")}");
 
         // DEFENSE: intercept enemy armies in our territory
         var invader = _gm.Armies.FirstOrDefault(a =>
@@ -150,38 +152,31 @@ public class AISystem
         var army = GetArmy(sect.Id);
         if (army == null) return;
 
-        if (army.Order == ArmyOrder.Idle)
+        if (army.Order == ArmyOrder.Idle || army.Order == ArmyOrder.Moving)
         {
-            // priority 1: attack enemy army in their territory
-            var targetArmy = _gm.Armies
-                .Where(a => a.SectId == enemyId && a.IsAlive)
-                .OrderBy(a => (a.Position - army.Position).LengthSquared())
-                .FirstOrDefault();
-            if (targetArmy != null)
-            {
-                army.AttackTargetArmyId = targetArmy.Id;
-                army.Order = ArmyOrder.Attacking;
-                return;
-            }
+            GD.Print($"[AI] {sect.Name} army finding target (order={army.Order})");
 
-            // priority 2: attack most valuable enemy city (prosperity)
+            // attack most valuable enemy city (prosperity)
             var enemyCities = _gm.Locations
                 .Where(l => l.OwnerSectId == enemyId && l.Type == LocationType.City)
                 .OrderByDescending(l => l.Prosperity)
                 .ThenBy(l => (l.Position - army.Position).LengthSquared())
                 .ToList();
+            GD.Print($"[AI] {sect.Name} enemy cities found: {enemyCities.Count}");
             if (enemyCities.Count > 0)
             {
+                GD.Print($"[AI] {sect.Name} moving to {enemyCities[0].Name}");
                 army.MoveTarget = enemyCities[0].Position;
                 army.Order = ArmyOrder.Moving;
                 return;
             }
 
-            // priority 3: attack enemy sect home
+            // fallback: attack enemy sect home
             var enemyHome = _gm.Locations
                 .FirstOrDefault(l => l.Type == LocationType.Sect && l.OwnerSectId == enemyId);
             if (enemyHome != null)
             {
+                GD.Print($"[AI] {sect.Name} no cities, attacking home {enemyHome.Name}");
                 army.MoveTarget = enemyHome.Position;
                 army.Order = ArmyOrder.Moving;
             }
@@ -195,13 +190,13 @@ public class AISystem
         // seek peace if losing badly
         int myCities = sect.ControlledCityIds.Count;
         int myArmyCount = _gm.Armies.Count(a => a.SectId == sect.Id && a.IsAlive);
-        var enemy = _gm.State.GetSect(enemyId);
-        int enemyCities2 = enemy?.ControlledCityIds.Count ?? 0;
+        var enemyS = _gm.State.GetSect(enemyId);
+        int enemyCities2 = enemyS?.ControlledCityIds.Count ?? 0;
         if (war.TurnsActive > 18 && (myArmyCount == 0 || myCities < enemyCities2 * 0.3f))
         {
             war.DefenderProposedPeace = true;
             war.Ended = true;
-            _gm.State.Log($"{sect.Name} 向 {enemy?.Name} 求和");
+            _gm.State.Log($"{sect.Name} 向 {enemyS?.Name} 求和");
         }
     }
 

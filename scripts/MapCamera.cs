@@ -10,12 +10,11 @@ public partial class MapCamera : Camera2D
     public float WorldW = 16384;
     public float WorldH = 16384;
 
-    private bool _middleDrag;
-    private bool _rightDrag;
-    private Vector2 _midDragStart;
-    private Vector2 _midCamStart;
-    private Vector2 _rDragStart;
-    private Vector2 _rCamStart;
+    private bool _middleDrag, _rightDrag, _leftDrag;
+    private Vector2 _midDragStart, _midCamStart;
+    private Vector2 _rDragStart, _rCamStart;
+    private Vector2 _lDragStart, _lCamStart;
+    private bool _leftWasDrag;
 
     public override void _UnhandledInput(InputEvent @event)
     {
@@ -33,6 +32,24 @@ public partial class MapCamera : Camera2D
             }
         }
 
+        // left drag
+        if (@event is InputEventMouseButton lb && lb.ButtonIndex == MouseButton.Left)
+        {
+            if (lb.Pressed) { _leftDrag = true; _leftWasDrag = false; _lDragStart = GetViewport().GetMousePosition(); _lCamStart = Position; }
+            else { _leftDrag = false; if (!_leftWasDrag) _leftWasDrag = false; }
+        }
+        if (@event is InputEventMouseMotion lm && _leftDrag)
+        {
+            Vector2 delta = (GetViewport().GetMousePosition() - _lDragStart);
+            if (delta.Length() > 8f) _leftWasDrag = true;
+            if (_leftWasDrag)
+            {
+                delta /= Zoom;
+                Position = _lCamStart - delta;
+            }
+        }
+
+        // middle drag
         if (@event is InputEventMouseButton mb2 && mb2.ButtonIndex == MouseButton.Middle)
         {
             if (mb2.Pressed) { _middleDrag = true; _midDragStart = GetViewport().GetMousePosition(); _midCamStart = Position; }
@@ -44,6 +61,7 @@ public partial class MapCamera : Camera2D
             Position = _midCamStart - delta;
         }
 
+        // right drag
         if (@event is InputEventMouseButton mb3 && mb3.ButtonIndex == MouseButton.Right)
         {
             if (mb3.Pressed) { _rightDrag = true; _rDragStart = GetViewport().GetMousePosition(); _rCamStart = Position; }
@@ -55,6 +73,8 @@ public partial class MapCamera : Camera2D
             Position = _rCamStart - delta;
         }
     }
+
+    public bool WasLeftDrag() { bool r = _leftWasDrag; _leftWasDrag = false; return r; }
 
     public override void _Process(double delta)
     {
@@ -86,15 +106,5 @@ public partial class MapCamera : Camera2D
         if (p.Y < 0) { p.Y += WorldH; wrapped = true; }
         if (p.Y >= WorldH) { p.Y -= WorldH; wrapped = true; }
         if (wrapped) Position = p;
-    }
-
-    public Vector2 GetWrappedMousePos()
-    {
-        var mp = GetGlobalMousePosition();
-        while (mp.X < 0) mp.X += WorldW;
-        while (mp.X >= WorldW) mp.X -= WorldW;
-        while (mp.Y < 0) mp.Y += WorldH;
-        while (mp.Y >= WorldH) mp.Y -= WorldH;
-        return mp;
     }
 }
