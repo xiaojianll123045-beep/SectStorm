@@ -126,17 +126,37 @@ public class AISystem
     private void ProcessWarAI(SectData sect, WarData war)
     {
         int enemyId = war.AttackerSectId == sect.Id ? war.DefenderSectId : war.AttackerSectId;
+
+        // DEFENSE: intercept enemy armies in our territory
+        var invader = _gm.Armies.FirstOrDefault(a =>
+            a.SectId == enemyId && a.IsAlive &&
+            _gm.OwnerAtPosition(a.Position) == sect.Id);
+        if (invader != null)
+        {
+            if (!HasArmy(sect.Id)) CreateAIResponseArmy(sect);
+            var defender = GetArmy(sect.Id);
+            if (defender != null && defender.Order == ArmyOrder.Idle)
+            {
+                defender.AttackTargetArmyId = invader.Id;
+                defender.Order = ArmyOrder.Attacking;
+                return;
+            }
+        }
+
+        // OFFENSE: attack enemy
         if (!HasArmy(sect.Id)) CreateAIResponseArmy(sect);
         if (!HasArmy(sect.Id)) return;
 
         var army = GetArmy(sect.Id);
         if (army == null) return;
 
-        // if army is idle, find a target
         if (army.Order == ArmyOrder.Idle)
         {
-            // priority 1: attack enemy army
-            var targetArmy = GetArmy(enemyId);
+            // priority 1: attack enemy army in their territory
+            var targetArmy = _gm.Armies
+                .Where(a => a.SectId == enemyId && a.IsAlive)
+                .OrderBy(a => (a.Position - army.Position).LengthSquared())
+                .FirstOrDefault();
             if (targetArmy != null)
             {
                 army.AttackTargetArmyId = targetArmy.Id;
@@ -144,14 +164,15 @@ public class AISystem
                 return;
             }
 
-            // priority 2: attack nearest enemy city
-            var enemyCity = _gm.Locations
+            // priority 2: attack most valuable enemy city (prosperity)
+            var enemyCities = _gm.Locations
                 .Where(l => l.OwnerSectId == enemyId && l.Type == LocationType.City)
-                .OrderBy(l => (l.Position - army.Position).LengthSquared())
-                .FirstOrDefault();
-            if (enemyCity != null)
+                .OrderByDescending(l => l.Prosperity)
+                .ThenBy(l => (l.Position - army.Position).LengthSquared())
+                .ToList();
+            if (enemyCities.Count > 0)
             {
-                army.MoveTarget = enemyCity.Position;
+                army.MoveTarget = enemyCities[0].Position;
                 army.Order = ArmyOrder.Moving;
                 return;
             }
@@ -166,12 +187,17 @@ public class AISystem
             }
         }
 
+        // GARRISON: if we control enemy cities, leave some troops
+        int capturedCount = _gm.Locations.Count(l => l.OwnerSectId == sect.Id && l.Type == LocationType.City);
+        if (capturedCount > 0 && !HasArmy(sect.Id) && sect.Lingshi > 30)
+            CreateAIResponseArmy(sect);
+
         // seek peace if losing badly
         int myCities = sect.ControlledCityIds.Count;
         int myArmyCount = _gm.Armies.Count(a => a.SectId == sect.Id && a.IsAlive);
         var enemy = _gm.State.GetSect(enemyId);
-        int enemyCities = enemy?.ControlledCityIds.Count ?? 0;
-        if (war.TurnsActive > 18 && (myArmyCount == 0 || myCities < enemyCities * 0.3f))
+        int enemyCities2 = enemy?.ControlledCityIds.Count ?? 0;
+        if (war.TurnsActive > 18 && (myArmyCount == 0 || myCities < enemyCities2 * 0.3f))
         {
             war.DefenderProposedPeace = true;
             war.Ended = true;
