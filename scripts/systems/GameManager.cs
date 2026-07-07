@@ -147,15 +147,20 @@ public partial class GameManager : Node
             if (step.Length() > dist) step = targetPos - army.Position;
             Vector2 newPos = army.Position + step;
 
-            // block entry to neutral/unauthorized territory
-            int newOwner = OwnerAtPosition(newPos);
-            bool canEnter = (newOwner == army.SectId || newOwner < 0);
-            if (!canEnter && newOwner >= 0)
-            {
-                var rel = State.GetRelation(army.SectId, newOwner);
-                canEnter = (rel != null && (rel.State == RelationState.Ally || rel.State == RelationState.War));
-            }
-            if (!canEnter) continue; // blocked at border
+        // territory speed modifier (no blocking, just slow down)
+        int terrainOwner = OwnerAtPosition(newPos);
+        float terrainMul = 1f;
+        if (terrainOwner == army.SectId) terrainMul = 1f;
+        else if (terrainOwner < 0) terrainMul = 0.8f;
+        else
+        {
+            var rel = State.GetRelation(army.SectId, terrainOwner);
+            if (rel == null) terrainMul = 0.6f;
+            else if (rel.State == RelationState.Ally) terrainMul = 0.9f;
+            else if (rel.State == RelationState.War) terrainMul = 0.7f;
+            else terrainMul = 0.5f;
+        }
+        step *= terrainMul;
 
             army.Position = newPos;
         }

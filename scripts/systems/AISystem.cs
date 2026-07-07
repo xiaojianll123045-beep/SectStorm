@@ -127,7 +127,7 @@ public class AISystem
     {
         int enemyId = war.AttackerSectId == sect.Id ? war.DefenderSectId : war.AttackerSectId;
         var enemy = _gm.State.GetSect(enemyId);
-        GD.Print($"[AI] WAR {sect.Name} vs {(enemy?.Name ?? "?")}");
+        GD.Print($"[AI] 战争 {sect.Name} vs {(enemy?.Name ?? "?")}");
 
         // DEFENSE: intercept enemy armies in our territory
         var invader = _gm.Armies.FirstOrDefault(a =>
@@ -154,7 +154,7 @@ public class AISystem
 
         if (army.Order == ArmyOrder.Idle || army.Order == ArmyOrder.Moving)
         {
-            GD.Print($"[AI] {sect.Name} army finding target (order={army.Order})");
+            GD.Print($"[AI] {sect.Name} 寻找目标 (状态={army.Order})");
 
             // attack most valuable enemy city (prosperity)
             var enemyCities = _gm.Locations
@@ -162,10 +162,10 @@ public class AISystem
                 .OrderByDescending(l => l.Prosperity)
                 .ThenBy(l => (l.Position - army.Position).LengthSquared())
                 .ToList();
-            GD.Print($"[AI] {sect.Name} enemy cities found: {enemyCities.Count}");
+            GD.Print($"[AI] {sect.Name} 找到敌方城市: {enemyCities.Count}");
             if (enemyCities.Count > 0)
             {
-                GD.Print($"[AI] {sect.Name} moving to {enemyCities[0].Name}");
+                GD.Print($"[AI] {sect.Name} 进军 {enemyCities[0].Name}");
                 army.MoveTarget = enemyCities[0].Position;
                 army.Order = ArmyOrder.Moving;
                 return;
