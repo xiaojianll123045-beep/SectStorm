@@ -310,8 +310,15 @@ public partial class MapView : Node2D
         return _sectTexs[ownerIdx % _sectTexs.Length];
     }
 
+    private ulong _lastFrameTime;
+
     public override void _Process(double delta)
     {
+        var now = Time.GetTicksMsec();
+        if (_lastFrameTime > 0 && now - _lastFrameTime > 200)
+            GD.Print($"[PERF] Frame took {now - _lastFrameTime}ms");
+        _lastFrameTime = now;
+
         _info.Text = $"Seed: {_seed}  |  城{CountType(LocationType.City)} 村{CountType(LocationType.Village)} 宗{CountType(LocationType.Sect)}  |  {MapWidth}x{MapHeight}";
 
         // territory-based hover
